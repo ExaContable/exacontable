@@ -1,0 +1,37 @@
+# EXA Contable
+
+> Sistema contable y financiero con facturación electrónica SRI para empresas ecuatorianas. Control de inventario, compras, ventas y reportes financieros en la nube. Más de 500 empresas confían en EXA.
+
+EXA Contable es una plataforma integral de contabilidad diseñada para emprendedores, PYMES y contadores en Ecuador. Ofrece facturación electrónica conectada al SRI, control de inventario multi-bodega, gestión de compras y ventas, reportes financieros y soporte técnico local. Funciona 100% en la nube, sin instalaciones, accesible desde cualquier dispositivo.
+
+## Páginas
+
+- [Inicio](https://exacontable.com/): Landing page principal con todas las secciones del producto
+- [Carrito](https://exacontable.com/carrito): Carrito de compras
+- [Checkout](https://exacontable.com/checkout): Proceso de finalizar compra
+- [Confirmación](https://exacontable.com/gracias): Página de confirmación post-compra
+
+## Funcionalidades
+
+- [Facturación Electrónica SRI](https://exacontable.com/#caracteristicas): Emisión de facturas, retenciones, notas de crédito/débito y guías de remisión. Autorización SRI en segundos.
+- [Compras y Ventas](https://exacontable.com/#caracteristicas): Ciclo completo de compras y ventas automatizado.
+- [Control de Inventario](https://exacontable.com/#caracteristicas): Kardex, multi-bodega, alertas de stock.
+- [Reportes Financieros](https://exacontable.com/#caracteristicas): Balances, estados de resultados, flujo de caja.
+- [Seguridad en la Nube](https://exacontable.com/#seguridad): Encriptación SSL, backups diarios, 2FA.
+- [Soporte Técnico](https://exacontable.com/#caracteristicas): Soporte local por teléfono, WhatsApp y email.
+
+## Planes
+
+- [Planes y Precios](https://exacontable.com/#planes): Sistema Contable, Plan Contador y Facturación Electrónica. Mensual, anual o compra total.
+
+## FAQ
+
+- [Preguntas Frecuentes](https://exacontable.com/#faq): 10 preguntas sobre EXA, facturación SRI, migración, seguridad y soporte.
+
+## Contacto
+
+- [Contacto](https://exacontable.com/#contacto): Formulario web y datos de contacto
+- WhatsApp: https://wa.me/593978835575
+- Email: info@exacontable.com
+- Teléfono: +593 97 883 5575
+- Dirección: Machala, El Oro, Ecuador
