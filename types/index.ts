@@ -46,7 +46,7 @@ export interface WooCommerceProduct {
 }
 
 export interface StoreProduct {
-  id: number;
+  id: string | number;
   name: string;
   slug: string;
   type: string;
@@ -65,7 +65,7 @@ export interface StoreProduct {
   };
   price_html: string;
   images: { src: string; alt: string }[];
-  categories: { id: number; name: string; slug: string }[];
+  categories: { id: string | number; name: string; slug: string }[];
   add_to_cart: {
     text: string;
     url: string;
@@ -78,7 +78,7 @@ export interface StoreProduct {
 
 export interface CartItem {
   key: string;
-  id: number;
+  id: string | number;
   quantity: number;
   name: string;
   prices: {

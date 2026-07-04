@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+
+# Local development
+.dev.db
+dev.db
+*.tsbuildinfo
+next-env.d.ts
+
+# Local env files (Vercel uses its own env vars)
+.env
+.env.local
+.env.production
+.env.production.example
+
+# Deployment artifacts
+deploy/
+
+# WhatsApp auth data (not needed on Vercel)
+whatsapp-auth/
+
+# Documentation
+README.md
+AGENTS.md
+CLAUDE.md

@@ -1,82 +1,108 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
-async function fetchNonce(wpUrl: string, cartToken: string): Promise<string> {
-  const headers: Record<string, string> = {};
-  if (cartToken) headers["Cart-Token"] = cartToken;
+async function getCartData(cartItemsRaw: any[]) {
+  const items = [];
+  let totalPrice = 0;
 
-  console.log("fetchNonce: fetching cart to get nonce, cartToken:", cartToken);
+  for (const raw of cartItemsRaw) {
+    const plan = await prisma.plan.findUnique({
+      where: { id: String(raw.id) },
+    });
+    if (plan) {
+      const itemTotal = plan.price * raw.quantity;
+      totalPrice += itemTotal;
 
-  const res = await fetch(`${wpUrl}/wp-json/wc/store/v1/cart`, { headers });
+      const priceInCents = Math.round(plan.price * 100).toString();
+      const lineTotalInCents = Math.round(itemTotal * 100).toString();
 
-  console.log("fetchNonce: cart status:", res.status);
-  console.log("fetchNonce: all response headers:", Object.fromEntries(res.headers.entries()));
-
-  const nonce = res.headers.get("X-WC-Store-API-Nonce") || res.headers.get("Nonce") || "";
-  console.log("fetchNonce: nonce found:", nonce ? "yes" : "no");
-
-  if (!nonce) {
-    console.log("fetchNonce: trying /cart/nonce endpoint");
-    try {
-      const nonceRes = await fetch(`${wpUrl}/wp-json/wc/store/v1/cart/nonce`, { headers });
-      console.log("fetchNonce: nonce endpoint status:", nonceRes.status);
-      console.log("fetchNonce: nonce endpoint headers:", Object.fromEntries(nonceRes.headers.entries()));
-      const nonceBody = await nonceRes.text();
-      console.log("fetchNonce: nonce endpoint body:", nonceBody);
-      const nonceFromBody = nonceRes.headers.get("X-WC-Store-API-Nonce") || nonceRes.headers.get("Nonce") || nonceBody || "";
-      return nonceFromBody;
-    } catch (e) {
-      console.error("fetchNonce: nonce endpoint error:", e);
+      items.push({
+        key: plan.id,
+        id: plan.id,
+        quantity: raw.quantity,
+        name: plan.name,
+        prices: {
+          price: priceInCents,
+          regular_price: priceInCents,
+          sale_price: priceInCents,
+          currency_code: "USD",
+          currency_symbol: "$",
+          currency_minor_unit: 2,
+          currency_decimal_separator: ".",
+          currency_thousand_separator: ",",
+          currency_prefix: "$",
+          currency_suffix: "",
+        },
+        totals: {
+          line_total: lineTotalInCents,
+          line_subtotal: lineTotalInCents,
+        },
+        images: [],
+        catalog_visibility: "visible",
+        extensions: {},
+      });
     }
   }
 
-  return nonce;
+  const totalInCents = Math.round(totalPrice * 100).toString();
+
+  return {
+    items,
+    coupons: [],
+    totals: {
+      total_price: totalInCents,
+      total_tax: "0",
+      currency_code: "USD",
+      currency_symbol: "$",
+      currency_minor_unit: 2,
+      currency_prefix: "$",
+      currency_suffix: "",
+    },
+    items_count: items.reduce((acc, i) => acc + i.quantity, 0),
+    needs_payment: totalPrice > 0,
+    needs_shipping: false,
+    payment_methods: ["bacs", "payphonebox"],
+  };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const cartToken = request.headers.get("cart-token") || "";
-    let nonce = request.headers.get("x-wc-store-api-nonce") || "";
+    const productId = body.id;
+    const quantity = body.quantity ?? 1;
 
-    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://admin.exacontable.com";
-
-    if (!nonce) {
-      nonce = await fetchNonce(wpUrl, cartToken);
+    if (!productId) {
+      return NextResponse.json({ error: "Product ID required" }, { status: 400 });
     }
 
-    console.log("POST add-item: using nonce:", nonce ? "yes (" + nonce.substring(0, 20) + "...)" : "no");
-    console.log("POST add-item: using cartToken:", cartToken ? "yes" : "no");
+    const cookieStore = await cookies();
+    const cartCookie = cookieStore.get("exa_cart")?.value;
+    let cartItems: any[] = cartCookie ? JSON.parse(cartCookie) : [];
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (cartToken) headers["Cart-Token"] = cartToken;
-    if (nonce) headers["Nonce"] = nonce;
-    headers["X-WC-Store-API-Nonce"] = nonce;
+    // Since plans are usually purchased individually, we replace the cart with the single plan
+    // or add it. To be user-friendly, let's allow only one plan in the cart at a time.
+    // That prevents users from checkout with conflicting plans (e.g. basic + executive).
+    cartItems = [{ id: String(productId), quantity: 1 }];
 
-    const res = await fetch(`${wpUrl}/wp-json/wc/store/v1/cart/add-item`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ id: body.id, quantity: body.quantity ?? 1 }),
+    cookieStore.set("exa_cart", JSON.stringify(cartItems), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      sameSite: "lax",
     });
 
-    console.log("POST add-item: WordPress response status:", res.status);
-    console.log("POST add-item: WordPress response headers:", Object.fromEntries(res.headers.entries()));
+    const cart = await getCartData(cartItems);
 
-    const newCartToken = res.headers.get("Cart-Token") || cartToken;
-    const newNonce = res.headers.get("X-WC-Store-API-Nonce") || res.headers.get("Nonce") || nonce;
-    const cart = await res.json();
-
-    if (!res.ok) {
-      return NextResponse.json({ error: cart.message || "Add to cart failed" }, { status: res.status });
-    }
-
-    const response = NextResponse.json({ cart, cartToken: newCartToken, nonce: newNonce });
-    if (newCartToken) response.headers.set("Cart-Token", newCartToken);
-    if (newNonce) response.headers.set("X-WC-Store-API-Nonce", newNonce);
+    const response = NextResponse.json({
+      cart,
+      cartToken: "local_cart",
+      nonce: "local_nonce",
+    });
+    response.headers.set("Cart-Token", "local_cart");
+    response.headers.set("X-WC-Store-API-Nonce", "local_nonce");
     return response;
   } catch (error) {
-    console.error("Error adding to cart:", error);
+    console.error("Error adding to local cart:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

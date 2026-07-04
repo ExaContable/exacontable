@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrder } from "@/lib/woocommerce-rest";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _request: Request,
@@ -7,44 +7,51 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const orderId = parseInt(id);
-    if (isNaN(orderId)) {
-      return NextResponse.json({ error: "ID de pedido invalido" }, { status: 400 });
+    
+    const order = await prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
     }
 
-    const order = await getOrder(orderId);
-
-    const receiptMeta = order.meta_data?.find(
-      (m: { key: string }) => m.key === "_billing_receipt_url"
-    );
-    const receiptUrl = receiptMeta?.value || null;
-
-    const billingFields: Record<string, string> = {};
-    if (order.meta_data) {
-      for (const meta of order.meta_data) {
-        if (meta.key.startsWith("billing_")) {
-          billingFields[meta.key.replace("billing_", "")] = meta.value;
-        }
-      }
-    }
+    const billingFields: Record<string, string> = {
+      usuario: order.usuario || "",
+      clave: order.clave || "",
+      genero: order.genero || "",
+      ruc: order.ruc || "",
+      cedula: order.cedula || "",
+      address_1: order.address || "",
+      city: order.city || "",
+      state: order.state || "",
+      postcode: order.postcode || "",
+    };
 
     return NextResponse.json({
       id: order.id,
       status: order.status,
-      payment_method: order.payment_method,
-      payment_method_title: order.payment_method_title,
-      date_created: order.date_created,
-      total: order.total,
-      currency: order.currency,
-      billing: order.billing,
-      line_items: order.line_items?.map((item: { name: string; quantity: number; price: number }) => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      receipt_url: receiptUrl,
+      payment_method: order.paymentMethod === "Transferencia Bancaria" ? "bacs" : "payphone",
+      payment_method_title: order.paymentMethod || "Transferencia Bancaria",
+      date_created: order.createdAt.toISOString(),
+      total: order.total.toFixed(2),
+      currency: "USD",
+      billing: {
+        first_name: order.customerName.split(" ")[0] || "",
+        last_name: order.customerName.split(" ").slice(1).join(" ") || "",
+        email: order.customerEmail,
+        phone: order.customerPhone,
+      },
+      line_items: [
+        {
+          name: order.planName,
+          quantity: 1,
+          price: order.total,
+        }
+      ],
+      receipt_url: order.receiptUrl,
       billing_fields: billingFields,
-      date_paid: order.date_paid,
+      date_paid: order.paymentStatus === "paid" ? order.updatedAt.toISOString() : null,
     });
   } catch (error) {
     console.error("Error fetching order:", error);

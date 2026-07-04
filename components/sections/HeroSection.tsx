@@ -30,7 +30,14 @@ function GradientLayers() {
           className="absolute inset-0"
           style={{ background: g }}
           initial={{ opacity: i === 0 ? 1 : 0 }}
-          animate={{ opacity: [i === 0 ? 1 : 0, i === 0 ? 0 : 1, i === 0 ? 0 : 1, i === 0 ? 1 : 0] }}
+          animate={{
+            opacity: [
+              i === 0 ? 1 : 0,
+              i === 0 ? 0 : 1,
+              i === 0 ? 0 : 1,
+              i === 0 ? 1 : 0,
+            ],
+          }}
           transition={{
             duration: 14,
             repeat: Infinity,
@@ -45,7 +52,14 @@ function GradientLayers() {
           className="absolute inset-0"
           style={{ background: g }}
           initial={{ opacity: i === 0 ? 1 : 0 }}
-          animate={{ opacity: [i === 0 ? 1 : 0, i === 0 ? 0 : 1, i === 0 ? 0 : 1, i === 0 ? 1 : 0] }}
+          animate={{
+            opacity: [
+              i === 0 ? 1 : 0,
+              i === 0 ? 0 : 1,
+              i === 0 ? 0 : 1,
+              i === 0 ? 1 : 0,
+            ],
+          }}
           transition={{
             duration: 10,
             repeat: Infinity,
@@ -63,20 +77,39 @@ const fadeUpVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, delay: 0.3 + i * 0.15, ease: [0.23, 0.86, 0.39, 0.96] as [number, number, number, number] },
+    transition: {
+      duration: 0.8,
+      delay: 0.3 + i * 0.15,
+      ease: [0.23, 0.86, 0.39, 0.96] as [number, number, number, number],
+    },
   }),
 };
 
 function DecorativeElements() {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      aria-hidden="true"
+    >
       <div className="absolute -left-32 top-1/4 h-64 w-64 rounded-full border border-primary/10" />
       <div className="absolute -right-20 top-1/3 h-48 w-48 rounded-full border border-primary/15" />
       <div className="absolute left-1/3 top-[60%] h-32 w-32 rounded-full bg-primary/5 blur-2xl" />
-      <svg className="absolute left-[5%] top-[15%] h-8 w-8 text-primary/10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+      <svg
+        className="absolute left-[5%] top-[15%] h-8 w-8 text-primary/10"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+      >
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
-      <svg className="absolute right-[8%] top-[70%] h-6 w-6 text-primary/15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+      <svg
+        className="absolute right-[8%] top-[70%] h-6 w-6 text-primary/15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1"
+      >
         <circle cx="12" cy="12" r="10" />
         <path d="M12 6v6l4 2" />
       </svg>
@@ -102,10 +135,15 @@ export function HeroSection() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary backdrop-blur-sm"
           >
             <span className="flex h-2 w-2 animate-pulse rounded-full bg-primary" />
-            Software contable todo-en-uno
+            Software contable de excelente funcionamiento{" "}
           </motion.div>
 
-          <motion.div custom={1} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={1}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15] text-balance">
               <span className="bg-gradient-to-b from-foreground to-foreground/80 bg-clip-text text-transparent">
                 Transforma la Gestión Financiera
@@ -117,11 +155,15 @@ export function HeroSection() {
             </h1>
           </motion.div>
 
-          <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={2}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <p className="mb-10 text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl max-w-2xl mx-auto">
-              Facturación SRI, control de stock, compras, ventas
-              y reportes financieros desde un solo lugar. 100% online, sin
-              instalaciones.
+              Facturación SRI, control de stock, compras, ventas y reportes
+              financieros desde un solo lugar. 100% online, sin instalaciones.
             </p>
           </motion.div>
 
@@ -154,18 +196,19 @@ export function HeroSection() {
           </motion.div>
         </div>
 
+        <motion.div
+          custom={4}
+          variants={fadeUpVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative w-full max-w-5xl mx-auto"
+        >
+          <div className="absolute -inset-10 rounded-[3rem] bg-gradient-to-b from-primary/20 via-primary/5 to-transparent blur-3xl opacity-75 -z-10" />
           <motion.div
-            custom={4}
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            className="relative w-full max-w-5xl mx-auto"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative rounded-2xl border border-border bg-gradient-to-b from-card/80 to-background/50 p-2 shadow-[0_24px_80px_-15px_rgba(0,0,0,0.8)] shadow-primary/5 backdrop-blur-sm"
           >
-            <div className="absolute -inset-10 rounded-[3rem] bg-gradient-to-b from-primary/20 via-primary/5 to-transparent blur-3xl opacity-75 -z-10" />
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative rounded-2xl border border-border bg-gradient-to-b from-card/80 to-background/50 p-2 shadow-[0_24px_80px_-15px_rgba(0,0,0,0.8)] shadow-primary/5 backdrop-blur-sm">
             {/* Barra superior estilo navegador */}
             <div className="flex items-center gap-1.5 px-4 py-2 border-b border-border/40 bg-background/40 rounded-t-xl">
               <span className="w-2.5 h-2.5 rounded-full bg-destructive/80" />
@@ -186,37 +229,7 @@ export function HeroSection() {
                 priority
               />
             </div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 1.2, duration: 0.5, ease: "backOut" }}
-              className="absolute -bottom-4 -right-4 z-20 hidden sm:flex items-center gap-3 rounded-2xl border border-primary/20 bg-card/95 backdrop-blur-md px-5 py-3 shadow-lg shadow-primary/10"
-            >
-              <div className="flex -space-x-1.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-primary/20 text-[9px] font-bold text-primary">J</div>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-primary/20 text-[9px] font-bold text-primary">M</div>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-primary/15 text-[9px] font-bold text-primary">+</div>
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-foreground">+500 empresas</p>
-                <p className="text-[10px] text-muted-foreground">ya confían en EXA</p>
-              </div>
-            </motion.div>
           </motion.div>
-          </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
-        >
-          <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/50 uppercase">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="h-6 w-[1px] bg-gradient-to-b from-primary/40 to-transparent"
-          />
         </motion.div>
       </div>
 

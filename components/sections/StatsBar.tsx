@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import { Users, Clock, ShieldCheck, BarChart3 } from "lucide-react";
 
 const stats = [
-  { icon: Users, value: "+500", label: "Empresas activas" },
-  { icon: Clock, value: "7+", label: "Años de experiencia" },
-  { icon: ShieldCheck, value: "99.9%", label: "Uptime garantizado" },
-  { icon: BarChart3, value: "15+", label: "KPIs en tiempo real" },
+  { icon: Users, value: "+250", label: "Empresas activas" },
+  { icon: Clock, value: "+15", label: "Años de experiencia" },
+  { icon: ShieldCheck, value: "99.9%", label: "Automatizado" },
+  { icon: BarChart3, value: "+50", label: "Modulos" },
 ];
 
 export function StatsBar() {
@@ -28,8 +28,12 @@ export function StatsBar() {
                 <stat.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-xs text-muted-foreground whitespace-nowrap">{stat.label}</p>
+                <p className="text-xl font-bold text-foreground">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">
+                  {stat.label}
+                </p>
               </div>
             </motion.div>
           ))}

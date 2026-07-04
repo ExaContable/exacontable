@@ -1,9 +1,7 @@
 "use client";
 
-import { Check, ShoppingCart, Zap, Rocket, Crown, Infinity, Star } from "lucide-react";
+import { Check, ShoppingCart, Zap, Rocket, Crown, Infinity } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import type { StoreProduct } from "@/types";
@@ -31,15 +29,161 @@ function PlanIcon({ slug, className }: { slug: string; className?: string }) {
   return <Icon className={className} />;
 }
 
-function getPopular(slug: string): boolean {
-  return slug.includes("emprendedor") || slug.includes("ideal");
-}
+function getHardcodedFeatures(name: string, slug: string): string[] {
+  const n = name.toLowerCase();
+  const s = slug.toLowerCase();
 
-function getCategoryBadge(categories: { slug: string }[]): string {
-  if (categories.some((c) => c.slug === "plan-sistema-contable")) return "Sistema Contable";
-  if (categories.some((c) => c.slug === "plan-contador")) return "Plan Contador";
-  if (categories.some((c) => c.slug === "facturacion-electronica")) return "Fact. Electronica";
-  return "";
+  // 1. Compra Total
+  if (s.includes("compra-total") || n.includes("compra total")) {
+    if (n.includes("corporativo") || s.includes("corporativo")) {
+      return [
+        "3 Empresas",
+        "Usuarios y Contadores Ilimitados",
+        "Todos los Módulos del Sistema incluidos",
+        "Primer año Facturación SRI Ilimitada",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+        "3 Meses de Capacitaciones",
+      ];
+    }
+    return [
+      "1 Empresa",
+      "Usuarios y Contadores Ilimitados",
+      "Todos los Módulos del Sistema incluidos",
+      "Primer año Facturación SRI Ilimitada",
+      "Soporte Técnico Personalizado",
+      "Actualizaciones",
+      "3 Meses de Capacitación",
+    ];
+  }
+
+  // 2. Facturación Electrónica (Anual)
+  if (s.includes("basico") || s.includes("ideal") || s.includes("ilimitado") || n.includes("básico") || n.includes("ideal") || n.includes("ilimitado")) {
+    if (n.includes("básico i") || n.includes("basico i") || s.includes("basico-i")) {
+      return [
+        "Facturas",
+        "Comprobantes de retención",
+        "Notas de crédito",
+        "Guías de remisión",
+        "100 Documentos anuales",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+      ];
+    }
+    if (n.includes("básico ii") || n.includes("basico ii") || s.includes("basico-ii")) {
+      return [
+        "Facturas",
+        "Comprobantes de retención",
+        "Notas de crédito",
+        "Guías de remisión",
+        "600 Documentos anuales",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+      ];
+    }
+    if (n.includes("ideal") && !n.includes("compra")) {
+      return [
+        "Facturas",
+        "Comprobantes de retención",
+        "Notas de crédito",
+        "Guías de remisión",
+        "1200 Documentos anuales",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+      ];
+    }
+    if (n.includes("ilimitado")) {
+      return [
+        "Facturas",
+        "Comprobantes de retención",
+        "Notas de crédito",
+        "Guías de remisión",
+        "Documentos Ilimitados",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+      ];
+    }
+  }
+
+  // 3. Sistema Integral
+  const isMensual = n.includes("mensual") || s.includes("mensual");
+  const isAnual = n.includes("anual") || s.includes("anual");
+
+  if (n.includes("emprendedor") || n.includes("starter") || s.includes("emprendedor") || s.includes("starter")) {
+    if (isMensual) {
+      return [
+        "1 Usuario",
+        "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos y Nómina",
+        "Facturación electrónica: 100 Documentos al mes",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+        "3 Meses de capacitación",
+      ];
+    }
+    return [
+      "1 Usuario",
+      "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos, Nómina",
+      "Facturación electrónica: 1200 Documentos al año",
+      "Soporte Técnico Personalizado",
+      "Actualizaciones",
+      "3 Meses de capacitación",
+    ];
+  }
+
+  if (n.includes("ejecutivo") || s.includes("ejecutivo")) {
+    if (isMensual) {
+      return [
+        "2 Usuarios - 1 Contador",
+        "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos",
+        "Nómina (5 Empleados)",
+        "Facturación electrónica: 200 Documentos al mes",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+        "3 Meses de capacitación",
+      ];
+    }
+    return [
+      "2 Usuarios - 1 Contador",
+      "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos",
+      "Nómina (5 Empleados)",
+      "Facturación electrónica: 2400 Documentos al año",
+      "Soporte Técnico Personalizado",
+      "Actualizaciones",
+      "3 Meses de capacitación",
+    ];
+  }
+
+  if (n.includes("empresarial") || s.includes("empresarial")) {
+    if (isMensual) {
+      return [
+        "3 Usuarios - 1 Contador",
+        "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos",
+        "Nómina (100 Empleados)",
+        "Facturación electrónica ilimitada",
+        "Soporte Técnico Personalizado",
+        "Actualizaciones",
+        "3 Meses de capacitación",
+      ];
+    }
+    return [
+      "3 Usuarios - 1 Contador",
+      "Módulos: Inventario, Ventas y Compras, Facturación electrónica, Tributación, Cuentas por Cobrar, Cuentas por Pagar, Contabilidad, Costo de venta, Bancos",
+      "Nómina (100 Empleados)",
+      "Facturación electrónica: Ilimitado",
+      "Soporte Técnico Personalizado",
+      "Actualizaciones",
+      "3 Meses de capacitación",
+    ];
+  }
+
+  return [
+    "Facturación Electrónica SRI Ilimitada",
+    "Control de Ventas, Compras e Inventarios",
+    "Reportes Financieros en Tiempo Real",
+    "Acceso Multi-usuario en la Nube",
+    "Actualizaciones automáticas ante cambios de Ley",
+    "Soporte Técnico de Alta Calidad",
+  ];
 }
 
 function parseFeatures(name: string, description: string, slug: string): string[] {
@@ -55,94 +199,9 @@ function parseFeatures(name: string, description: string, slug: string): string[
     }
   }
 
-  if (features.length < 3) {
-    const nameLower = name.toLowerCase();
-    const slugLower = slug.toLowerCase();
+  if (features.length >= 3) return features.slice(0, 8);
 
-    // Caso A: Facturación Electrónica (Básico, Ideal, Ilimitado)
-    if (slugLower.includes("facturacion") || nameLower.includes("firma") || nameLower.includes("básico") || nameLower.includes("ideal") || nameLower.includes("ilimitado")) {
-      if (nameLower.includes("básico") || nameLower.includes("basico") || slugLower.includes("basico")) {
-        return [
-          "Facturación Electrónica Ilimitada",
-          "Facturas, Notas de Crédito, Retenciones",
-          "Envío directo al SRI y al Cliente",
-          "1 Establecimiento y Punto de Emisión",
-          "Carga de firma electrónica (.p12)",
-          "Soporte técnico por chat y correo",
-          "Actualizaciones de leyes del SRI gratis"
-        ];
-      }
-      if (nameLower.includes("ideal") || slugLower.includes("ideal")) {
-        return [
-          "Todo lo del Plan Básico",
-          "Liquidaciones de Compra y Guías de Remisión",
-          "Hasta 3 Establecimientos / Puntos de Emisión",
-          "Carga masiva de Clientes y Productos (Excel)",
-          "Reporte consolidado de Ventas XML y PDF",
-          "Acceso para 2 usuarios independientes",
-          "Soporte técnico preferente por WhatsApp"
-        ];
-      }
-      if (nameLower.includes("ilimitado") || slugLower.includes("ilimitado")) {
-        return [
-          "Todo lo del Plan Ideal",
-          "Firma Electrónica Integrada en Nube",
-          "Establecimientos y Puntos de Emisión Ilimitados",
-          "Usuarios y accesos simultáneos ilimitados",
-          "Capacitación inicial personalizada 1 a 1",
-          "Reportes avanzados de ventas y retenciones",
-          "Soporte prioritario 24/7 vía telefónica y chat"
-        ];
-      }
-    }
-
-    // Caso B: Planes Sistema Contable / General
-    if (nameLower.includes("starter") || nameLower.includes("emprendedor") || nameLower.includes("junior") || slugLower.includes("starter") || slugLower.includes("emprendedor")) {
-      return [
-        "Facturación Electrónica 100% Ilimitada",
-        "Registro y Control de Compras y Gastos",
-        "Control de Inventario básico de Productos",
-        "Módulo de Clientes y Cuentas por Cobrar",
-        "1 Usuario Administrador",
-        "Dashboard con KPIs en tiempo real",
-        "Soporte técnico por correo y chat"
-      ];
-    }
-    if (nameLower.includes("ejecutivo") || nameLower.includes("profesional") || nameLower.includes("ideal") || slugLower.includes("ejecutivo") || slugLower.includes("profesional")) {
-      return [
-        "Todo lo del Plan Emprendedor",
-        "Control de Inventario avanzado (Multi-bodega + Kardex)",
-        "Generación automática de Anexos Transaccionales (ATS)",
-        "Reportes Financieros (Pérdidas y Ganancias, Balance)",
-        "Conciliación Bancaria automática",
-        "Hasta 3 Usuarios con roles y accesos",
-        "Soporte técnico prioritario por WhatsApp"
-      ];
-    }
-    if (nameLower.includes("empresarial") || nameLower.includes("corporativo") || nameLower.includes("ilimitado") || slugLower.includes("empresarial") || slugLower.includes("corporativo")) {
-      return [
-        "Todo lo del Plan Ejecutivo",
-        "Contabilidad General automatizada y Asientos",
-        "Facturación multi-establecimiento ilimitada",
-        "Gestión y Control de Centros de Costos",
-        "API abierta de integración con otros sistemas",
-        "Usuarios y accesos simultáneos ilimitados",
-        "Soporte 24/7 con asesoría contable experta"
-      ];
-    }
-
-    // Por defecto si no coincide
-    return [
-      "Facturación Electrónica SRI Ilimitada",
-      "Control de Ventas, Compras e Inventarios",
-      "Reportes Financieros en Tiempo Real",
-      "Acceso Multi-usuario en la Nube",
-      "Actualizaciones automáticas ante cambios de Ley",
-      "Soporte Técnico de Alta Calidad"
-    ];
-  }
-
-  return features.slice(0, 8);
+  return getHardcodedFeatures(name, slug);
 }
 
 interface PlanCardProps {
@@ -152,10 +211,7 @@ interface PlanCardProps {
 
 export function PlanCard({ product, index = 0 }: PlanCardProps) {
   const { addItem, loading } = useCart();
-  const isPopular = getPopular(product.slug);
   const features = parseFeatures(product.name, product.description, product.slug);
-  const categoryBadge = getCategoryBadge(product.categories);
-
   const priceMinorUnits = parseInt(product.prices.price);
   const divisor = Math.pow(10, product.prices.currency_minor_unit || 2);
   const price = priceMinorUnits / divisor;
@@ -173,30 +229,10 @@ export function PlanCard({ product, index = 0 }: PlanCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05 }}
-      className={cn(
-        "relative flex flex-col rounded-2xl border bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 shadow-md hover:shadow-xl",
-        isPopular
-          ? "border-primary/50 shadow-[0_8px_30px_rgba(220,76,30,0.1)] hover:border-primary hover:shadow-[0_12px_40px_rgba(220,76,30,0.15)]"
-          : "border-zinc-200 hover:border-primary/20",
-      )}
+      className="relative flex flex-col rounded-2xl border border-zinc-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 shadow-md hover:shadow-xl hover:border-primary/20"
     >
-      {isPopular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-          <Badge className="bg-primary text-primary-foreground shadow-[0_0_15px_rgba(160,37,37,0.4)] whitespace-nowrap gap-1 px-3 py-1">
-            <Star className="h-3 w-3 fill-primary-foreground" />
-            Más Popular
-          </Badge>
-        </div>
-      )}
-
-      <div className={`pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ${isPopular ? "bg-[radial-gradient(ellipse_at_top,rgba(220,76,30,0.03),transparent_70%)]" : ""} ${isPopular ? "opacity-100" : ""}`} />
 
       <div className="relative mb-4">
-        {categoryBadge && (
-          <span className="mb-3 inline-block text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-            {categoryBadge}
-          </span>
-        )}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-white shadow-lg shadow-primary/20">
             <PlanIcon slug={product.slug} className="h-5 w-5" />
@@ -226,28 +262,22 @@ export function PlanCard({ product, index = 0 }: PlanCardProps) {
       </ul>
 
       <div className="relative">
-        <Button
-          className={cn(
-            "w-full gap-2 transition-all duration-300 rounded-full font-bold",
-            isPopular
-              ? "bg-primary hover:bg-primary/95 text-white shadow-md shadow-primary/20"
-              : "border-zinc-200 hover:border-primary/20 text-slate-800 hover:bg-slate-50 bg-white",
-          )}
-          variant={isPopular ? "default" : "outline"}
-          size="lg"
-          disabled={loading}
-          onClick={async () => {
-            try {
-              await addItem(product.id);
-              toast.success(`${product.name} agregado al carrito`);
-            } catch {
-              toast.error("Error al agregar al carrito");
-            }
-          }}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          Comprar Plan
-        </Button>
+          <Button
+            className="w-full gap-2 transition-all duration-300 rounded-full font-bold bg-primary hover:bg-primary/95 text-white shadow-md shadow-primary/20"
+            size="lg"
+            disabled={loading}
+            onClick={async () => {
+              try {
+                await addItem(product.id);
+                toast.success(`${product.name} agregado al carrito`);
+              } catch {
+                toast.error("Error al agregar al carrito");
+              }
+            }}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Comprar Plan
+          </Button>
       </div>
     </motion.div>
   );

@@ -60,7 +60,7 @@ export function useCart() {
   }, [fetchCart]);
 
   const addItem = useCallback(
-    async (productId: number, quantity: number = 1) => {
+    async (productId: string | number, quantity: number = 1) => {
       try {
         useCartStore.getState().setLoading(true);
         const token = getStoredToken();

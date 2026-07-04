@@ -19,6 +19,18 @@
 
 # production
 /build
+/deploy
+
+# prisma
+/lib/generated/prisma
+
+# database
+dev.db
+*.db
+*.db-journal
+
+# uploads
+public/uploads/
 
 # misc
 .DS_Store
@@ -39,3 +51,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# whatsapp auth
+whatsapp-auth/
+
+/lib/generated/prisma

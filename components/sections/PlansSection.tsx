@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PlanToggle } from "@/components/plans/PlanToggle";
 import { PlanCard } from "@/components/plans/PlanCard";
+import { CustomPlanBuilder } from "@/components/plans/CustomPlanBuilder";
 import { useProducts } from "@/hooks/use-products";
 import type { StoreProduct } from "@/types";
 import type { BillingPeriod } from "@/types";
@@ -13,6 +14,11 @@ import { cn } from "@/lib/utils";
 
 function filterByPeriod(products: StoreProduct[], period: BillingPeriod): StoreProduct[] {
   return products.filter((p) => {
+    // If local product has explicit period, use it directly
+    if ((p as any).period) {
+      return (p as any).period === period;
+    }
+
     const name = p.name.toLowerCase();
     const slug = p.slug.toLowerCase();
 
@@ -54,13 +60,20 @@ function SkeletonCard() {
 }
 
 export function PlansSection() {
-  const [activeTab, setActiveTab] = useState<"sistema" | "facturacion">("sistema");
+  const [activeTab, setActiveTab] = useState<"sistema" | "facturacion" | "servicios">("sistema");
   const [period, setPeriod] = useState<BillingPeriod>("mensual");
   const { products, loading, error, refetch } = useProducts("per_page=50");
 
-  const filtered = activeTab === "sistema"
-    ? filterByPeriod(products, period).filter((p) => p.categories[0]?.slug !== "facturacion-electronica")
-    : products.filter((p) => p.categories[0]?.slug === "facturacion-electronica");
+  const filtered = (() => {
+    if (activeTab === "sistema") {
+      return filterByPeriod(products, period)
+        .filter((p) => p.categories[0]?.slug === "sistema-contable");
+    }
+    if (activeTab === "facturacion") {
+      return products.filter((p) => p.categories[0]?.slug === "facturacion-electronica");
+    }
+    return products.filter((p) => p.categories[0]?.slug === "servicios");
+  })();
 
   const grouped = filtered.reduce<Record<string, StoreProduct[]>>((acc, p) => {
     const cat = p.categories[0]?.slug || "otros";
@@ -70,12 +83,13 @@ export function PlansSection() {
   }, {});
 
   const categoryOrder = activeTab === "sistema"
-    ? ["plan-sistema-contable", "plan-contador", "servicios"]
-    : ["facturacion-electronica"];
+    ? ["sistema-contable"]
+    : activeTab === "facturacion"
+    ? ["facturacion-electronica"]
+    : ["servicios"];
 
   const categoryNames: Record<string, string> = {
-    "plan-sistema-contable": "Planes Sistema Contable",
-    "plan-contador": "Planes Contador",
+    "sistema-contable": "Planes Sistema Contable",
     "facturacion-electronica": "Facturación Electrónica",
     servicios: "Servicios",
   };
@@ -125,6 +139,17 @@ export function PlansSection() {
               )}
             >
               Facturación Electrónica
+            </button>
+            <button
+              onClick={() => setActiveTab("servicios")}
+              className={cn(
+                "relative rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-300",
+                activeTab === "servicios"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Servicios
             </button>
           </div>
 
@@ -176,9 +201,10 @@ export function PlansSection() {
               >
                 <div className="rounded-2xl border border-dashed border-border p-12">
                   <p className="text-muted-foreground">
-                    No hay planes disponibles para esta categoría.
+                    No hay planes disponibles para esta categoría o período.
                   </p>
                 </div>
+                <CustomPlanBuilder />
               </motion.div>
             ) : (
               categoryOrder.map(
@@ -186,7 +212,7 @@ export function PlansSection() {
                   grouped[cat] &&
                   grouped[cat].length > 0 && (
                     <div key={cat} className="mt-12">
-<div className="mb-6 flex items-center gap-3">
+                      <div className="mb-6 flex items-center gap-3">
                          <div className="h-px flex-1 bg-border" />
                          <h3 className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
                            {categoryNames[cat] || cat}
@@ -202,6 +228,7 @@ export function PlansSection() {
                           />
                         ))}
                       </div>
+                      <CustomPlanBuilder />
                     </div>
                   )
               )

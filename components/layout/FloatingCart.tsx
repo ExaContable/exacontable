@@ -6,10 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function FloatingCart() {
-  const { itemCount, toggleOpen, isOpen } = useCart();
+import { usePathname } from "next/navigation";
 
-  if (itemCount === 0 || isOpen) return null;
+export function FloatingCart() {
+  const pathname = usePathname();
+  const { itemCount, toggleOpen, isOpen, cart } = useCart();
+
+  if (pathname?.startsWith("/admin")) return null;
+  if (isOpen) return null;
+
+  const hasItems = cart && cart.items.length > 0;
 
   return (
     <AnimatePresence>
@@ -24,12 +30,14 @@ export function FloatingCart() {
           size="icon"
           onClick={toggleOpen}
           className="relative h-14 w-14 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground shadow-[0_8px_32px_rgba(220,76,30,0.3)] hover:scale-105 active:scale-95 transition-all duration-300 border border-primary/20"
-          aria-label="Abrir carrito"
+          aria-label={hasItems ? `Carrito con ${itemCount} producto(s)` : "Abrir carrito"}
         >
           <ShoppingCart className="h-6 w-6" />
-          <Badge className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] text-black font-extrabold shadow-md p-0 border border-border">
-            {itemCount}
-          </Badge>
+          {hasItems && (
+            <Badge className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] text-black font-extrabold shadow-md p-0 border border-border">
+              {itemCount}
+            </Badge>
+          )}
         </Button>
       </motion.div>
     </AnimatePresence>

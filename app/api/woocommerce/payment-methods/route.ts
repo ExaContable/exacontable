@@ -1,34 +1,60 @@
 import { NextResponse } from "next/server";
-import { wooRest } from "@/lib/woocommerce-rest";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Obtener todas las pasarelas de pago de WooCommerce
-    const { data } = await wooRest.get("payment_gateways");
-    
-    // Filtrar sólo las que están activas (enabled === true)
-    const activeGateways = data
-      .filter((gateway: { enabled: boolean }) => gateway.enabled)
-      .map((gateway: { id: string; title: string; description: string }) => ({
-        id: gateway.id,
-        title: gateway.title,
-        description: gateway.description,
-      }));
+    const paymentMethods = await prisma.paymentMethod.findMany({
+      where: { isActive: true },
+    });
+
+    const activeGateways = paymentMethods.map((method) => {
+      let accounts = undefined;
+      if (method.code === "bacs" && method.config) {
+        try {
+          const configObj = JSON.parse(method.config);
+          if (configObj.bank_name || configObj.account_number) {
+            accounts = [
+              {
+                account_name: configObj.account_name || "EXA CONTABLE",
+                account_number: configObj.account_number || "",
+                bank_name: configObj.bank_name || "Banco Pichincha",
+              },
+            ];
+          }
+        } catch (e) {
+          console.warn("Failed to parse bacs config:", e);
+        }
+      }
+
+      return {
+        id: method.code,
+        title: method.name,
+        description: method.description || "",
+        ...(accounts && { accounts }),
+      };
+    });
 
     return NextResponse.json(activeGateways);
   } catch (error) {
-    console.error("Error fetching payment gateways:", error);
-    // Si falla, devolvemos un fallback por defecto para no romper el flujo
+    console.error("Error fetching local payment gateways:", error);
+    // Hardcoded fallback in case database query fails
     return NextResponse.json([
       {
         id: "bacs",
         title: "Transferencia Bancaria Directa",
-        description: "Banco Pichincha - Realiza tu transferencia y sube tu comprobante de pago.",
+        description: "Realiza tu transferencia bancaria y sube tu comprobante de pago.",
+        accounts: [
+          {
+            account_name: "EXA CONTABLE S.A.S.",
+            account_number: "1234567890",
+            bank_name: "Banco Pichincha",
+          },
+        ],
       },
       {
         id: "payphonebox",
-        title: "Payphone",
-        description: "Paga de forma segura con tu tarjeta de crédito o débito a través de Payphone.",
+        title: "PayPhone",
+        description: "Paga de forma segura con tu tarjeta de crédito o débito a través de PayPhone.",
       },
     ]);
   }

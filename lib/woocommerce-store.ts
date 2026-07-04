@@ -1,4 +1,4 @@
-const STORE_API = `${process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://admin.exacontable.com"}/wp-json/wc/store/v1`;
+const STORE_API = "/api/woocommerce";
 
 async function storeFetch(endpoint: string, options: RequestInit = {}) {
   const url = `${STORE_API}${endpoint}`;
@@ -34,7 +34,7 @@ export async function getCart(cartToken?: string) {
   return { cart, nonce };
 }
 
-export async function addToCart(productId: number, quantity: number = 1, cartToken?: string, nonce?: string) {
+export async function addToCart(productId: string | number, quantity: number = 1, cartToken?: string, nonce?: string) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };

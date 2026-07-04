@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
 import { FloatingCart } from "@/components/layout/FloatingCart";
+import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import { Providers } from "@/components/layout/Providers";
 
 const sora = Sora({
@@ -131,6 +132,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
           <CartDrawer />
+          <FloatingWhatsApp />
           <FloatingCart />
         </Providers>
       </body>

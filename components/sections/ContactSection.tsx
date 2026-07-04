@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, MapPin, Send, MessageCircle, CheckCircle2, Clock, Globe2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -112,7 +112,7 @@ export function ContactSection() {
             ¿Tienes alguna duda?
           </h2>
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Rellena el formulario o escríbenos por WhatsApp y un asesor de EXA te atenderá personalmente.
+            Rellena el formulario y un asesor de EXA te atenderá personalmente.
           </p>
         </motion.div>
 
@@ -217,7 +217,7 @@ export function ContactSection() {
                                 <FormLabel>Asunto</FormLabel>
                                 <FormControl>
                                   <Select value={field.value} onValueChange={field.onChange}>
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger>
                                       <SelectValue placeholder="Selecciona un asunto" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -289,22 +289,6 @@ export function ContactSection() {
               Información de contacto
             </h3>
 
-            <a
-              href="https://wa.me/593978835575"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/[0.08] to-primary/[0.02] p-5 transition-all hover:shadow-1"
-            >
-              <div className="relative z-10 rounded-xl bg-primary p-3.5 text-white shadow-md transition-transform group-hover:scale-110 group-hover:rotate-6">
-                <MessageCircle className="h-5 w-5" />
-              </div>
-              <div className="relative z-10">
-                <p className="text-base font-semibold text-foreground">WhatsApp</p>
-                <p className="text-sm text-muted-foreground">Respuesta en minutos</p>
-              </div>
-              <MessageCircle className="absolute right-4 top-1/2 h-16 w-16 -translate-y-1/2 text-primary/[0.07]" />
-            </a>
-
             <div className="space-y-3">
               {[
                 {
@@ -324,12 +308,7 @@ export function ContactSection() {
                   label: "Dirección",
                   value: "La aurora Calle los ceibos, Machala, El Oro, Ecuador",
                 },
-                {
-                  icon: Globe2,
-                  label: "Sitio web",
-                  value: "exacontable.com",
-                  href: "https://exacontable.com",
-                },
+
               ].map((item) => (
                 <div
                   key={item.label}

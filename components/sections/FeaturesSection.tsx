@@ -250,7 +250,7 @@ export function FeaturesSection() {
           <Link href="/#planes">
             <Button
               size="lg"
-              className="group gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold px-6 shadow-[0_8px_32px_rgba(220,76,30,0.2)]"
+              className="group gap-2 rounded-full bg-white hover:bg-gray-100 text-[#8B1E21] font-semibold px-6 shadow-[0_8px_32px_rgba(0,0,0,0.15)]"
             >
               Ver planes disponibles
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

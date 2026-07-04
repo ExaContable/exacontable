@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { sendReceiptNotification } from "@/lib/whatsapp";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -28,24 +30,25 @@ export async function POST(request: Request) {
 
     const receiptUrl = `/uploads/receipts/${orderId}/${filename}`;
 
-    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://admin.exacontable.com";
-    await fetch(`${wpUrl}/wp-json/wc/v3/orders/${orderId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${Buffer.from(
-          `${process.env.WOOCOMMERCE_KEY}:${process.env.WOOCOMMERCE_SECRET}`
-        ).toString("base64")}`,
+    // Update local order
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        receiptUrl,
+        status: "processing", // Move to processing (waiting for admin verification)
       },
-      body: JSON.stringify({
-        meta_data: [
-          {
-            key: "_billing_receipt_url",
-            value: receiptUrl,
-          },
-        ],
-      }),
     });
+
+    // Send WhatsApp notification to Support
+    try {
+      await sendReceiptNotification({
+        order_id: order.id,
+        customer_name: order.customerName,
+        customer_email: order.customerEmail,
+      });
+    } catch (waErr) {
+      console.error("Failed to send WhatsApp receipt notification:", waErr);
+    }
 
     return NextResponse.json({
       success: true,

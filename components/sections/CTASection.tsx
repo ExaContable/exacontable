@@ -38,7 +38,7 @@ export function CTASection() {
             >
               <Button
                 size="lg"
-                className="group gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold px-8 shadow-[0_8px_32px_rgba(220,76,30,0.2)] hover:shadow-[0_12px_40px_rgba(220,76,30,0.3)] transition-all duration-300"
+                className="group gap-2 rounded-full bg-white hover:bg-gray-100 text-[#8B1E21] font-semibold px-8 shadow-[0_8px_32px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-all duration-300"
               >
                 Solicita una demo
                 <ArrowRight className="h-4 w-4 transition-all duration-300 group-hover:translate-x-1" />
