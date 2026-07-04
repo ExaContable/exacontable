@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { fetchProducts, fetchProductCategories } from "@/lib/woocommerce-rest"
 
 export async function POST() {
   try {
+    const { fetchProducts, fetchProductCategories } = await import("@/lib/woocommerce-rest")
+
     const categories = await fetchProductCategories()
 
     const allowedSlugs = ["plan-sistema-contable", "plan-contador", "facturacion-electronica", "servicios"]
@@ -32,7 +33,6 @@ export async function POST() {
             period = "anual";
           }
 
-          // Split description by lines, trim, and clean up to use as features list
           const descriptionClean = p.description ? p.description.replace(/<[^>]*>/g, "").trim() : "";
           const features = descriptionClean 
             ? descriptionClean.split("\n").map((f: string) => f.replace(/^[-•*+]\s*/, "").trim()).filter(Boolean)
