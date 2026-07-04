@@ -3,7 +3,7 @@
   "buildCommand": "npm run vercel-build",
   "outputDirectory": ".next",
   "functions": {
-    "app/api/**/route.ts": {
+    "api/**": {
       "maxDuration": 30
     }
   }
