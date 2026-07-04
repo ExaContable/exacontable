@@ -11,7 +11,7 @@
     "whatsapp:connect": "node scripts/whatsapp-connect.js",
     "deploy:prepare": "node scripts/prepare-deploy.js",
     "deploy": "npm run build && npm run deploy:prepare",
-    "vercel-build": "prisma migrate deploy && next build"
+    "vercel-build": "next build"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
