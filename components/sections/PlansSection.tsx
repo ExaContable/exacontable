@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { PlanToggle } from "@/components/plans/PlanToggle";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { CustomPlanBuilder } from "@/components/plans/CustomPlanBuilder";
 import { useProducts } from "@/hooks/use-products";
 import type { StoreProduct } from "@/types";
 import type { BillingPeriod } from "@/types";
-import { motion } from "framer-motion";
-import { RefreshCw, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RefreshCw, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -59,10 +59,22 @@ function SkeletonCard() {
   );
 }
 
+const slideVariants = {
+  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -60 : 60 }),
+};
+
 export function PlansSection() {
   const [activeTab, setActiveTab] = useState<"sistema" | "facturacion" | "servicios">("sistema");
   const [period, setPeriod] = useState<BillingPeriod>("mensual");
+  const [page, setPage] = useState(0);
+  const [direction, setDirection] = useState(1);
   const { products, loading, error, refetch } = useProducts("per_page=50");
+
+  useEffect(() => {
+    setPage(0);
+  }, [activeTab, period]);
 
   const filtered = (() => {
     if (activeTab === "sistema") {
@@ -93,6 +105,26 @@ export function PlansSection() {
     "facturacion-electronica": "Facturación Electrónica",
     servicios: "Servicios",
   };
+
+  const currentPlans = categoryOrder.flatMap((cat) => grouped[cat] || []);
+  const totalPages = Math.max(1, Math.ceil(currentPlans.length / 1));
+
+  const clampedPage = Math.min(page, Math.max(0, currentPlans.length - 1));
+
+  const goTo = useCallback((i: number) => {
+    setDirection(i > page ? 1 : -1);
+    setPage(i);
+  }, [page]);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setPage((prev) => (prev + 1) % totalPages);
+  }, [totalPages]);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setPage((prev) => (prev - 1 + totalPages) % totalPages);
+  }, [totalPages]);
 
   return (
     <section id="planes" className="scroll-mt-20 pt-40 pb-36 relative overflow-hidden bg-background">
@@ -219,7 +251,67 @@ export function PlansSection() {
                          </h3>
                          <div className="h-px flex-1 bg-border" />
                       </div>
-                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {/* Mobile carousel */}
+                      <div className="sm:hidden">
+                        {currentPlans.length > 0 && (
+                          <div className="relative">
+                            <AnimatePresence mode="wait" custom={direction}>
+                              <motion.div
+                                key={clampedPage}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                              >
+                                  <PlanCard
+                                    product={currentPlans[clampedPage]}
+                                    index={clampedPage}
+                                  />
+                              </motion.div>
+                            </AnimatePresence>
+
+                            {totalPages > 1 && (
+                              <>
+                                <button
+                                  onClick={prev}
+                                  aria-label="Anterior"
+                                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md text-slate-700 hover:text-primary hover:shadow-lg transition-all border border-zinc-200"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={next}
+                                  aria-label="Siguiente"
+                                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md text-slate-700 hover:text-primary hover:shadow-lg transition-all border border-zinc-200"
+                                >
+                                  <ChevronRight className="h-4 w-4" />
+                                </button>
+                              </>
+                            )}
+
+                            {totalPages > 1 && (
+                              <div className="flex justify-center gap-2 mt-6">
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                  <button
+                                    key={i}
+                                    onClick={() => goTo(i)}
+                                    aria-label={`Ir a página ${i + 1}`}
+                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                      i === page
+                                        ? "w-6 bg-primary"
+                                        : "w-2 bg-primary/30 hover:bg-primary/50"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {/* Desktop grid */}
+                      <div className="hidden sm:grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {grouped[cat].map((product, index) => (
                           <PlanCard
                             key={product.id}

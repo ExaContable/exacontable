@@ -210,6 +210,8 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ product, index = 0 }: PlanCardProps) {
+  if (!product) return null;
+
   const { addItem, loading } = useCart();
   const features = parseFeatures(product.name, product.description, product.slug);
   const priceMinorUnits = parseInt(product.prices.price);

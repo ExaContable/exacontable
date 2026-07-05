@@ -1,7 +1,8 @@
 "use client";
 
-import { UserCheck, Upload, Play, TrendingUp, ArrowDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { UserCheck, Upload, Play, TrendingUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback } from "react";
 
 const steps = [
   {
@@ -40,7 +41,34 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const slideVariants = {
+  enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -60 : 60 }),
+};
+
 export function HowItWorksSection() {
+  const [page, setPage] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const totalPages = steps.length;
+
+  const goTo = useCallback((i: number) => {
+    setDirection(i > page ? 1 : -1);
+    setPage(i);
+  }, [page]);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setPage((prev) => (prev + 1) % totalPages);
+  }, [totalPages]);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setPage((prev) => (prev - 1 + totalPages) % totalPages);
+  }, [totalPages]);
+
+  const step = steps[page];
+
   return (
     <section id="funcionamiento" className="scroll-mt-20 relative py-24 overflow-hidden bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -61,12 +89,71 @@ export function HowItWorksSection() {
           </p>
         </motion.div>
 
+        {/* Mobile carousel */}
+        <div className="sm:hidden mt-16">
+          <div className="relative">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={page}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="text-center"
+              >
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <step.icon className="h-7 w-7" />
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-foreground font-heading">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted-foreground max-w-xs mx-auto">
+                  {step.description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+
+            <button
+              onClick={prev}
+              aria-label="Anterior"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md text-slate-700 hover:text-primary hover:shadow-lg transition-all border border-zinc-200"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={next}
+              aria-label="Siguiente"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md text-slate-700 hover:text-primary hover:shadow-lg transition-all border border-zinc-200"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Ir al paso ${i + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === page
+                    ? "w-6 bg-primary"
+                    : "w-2 bg-primary/30 hover:bg-primary/50"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="relative mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+          className="hidden sm:grid relative mt-16 gap-8 sm:grid-cols-2 lg:grid-cols-4"
         >
           {steps.map((step, i) => (
             <motion.div
