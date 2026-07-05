@@ -1,7 +1,5 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { StatsCard } from "@/components/admin/StatsCard"
 import {
   Package,
@@ -11,8 +9,6 @@ import {
   Clock,
   CheckCircle,
   ArrowRight,
-  RefreshCw,
-  Loader2,
   Calendar,
   MessageSquare,
   Sliders,
@@ -30,7 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { toast } from "sonner"
 
 interface Order {
   id: string
@@ -66,27 +61,6 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 }
 
 export function DashboardClient({ stats }: { stats: Stats }) {
-  const router = useRouter()
-  const [syncing, setSyncing] = useState(false)
-
-  async function handleSyncPlans() {
-    setSyncing(true)
-    try {
-      const res = await fetch("/api/admin/plans/sync", { method: "POST" })
-      if (res.ok) {
-        const data = await res.json()
-        toast.success(`Planes sincronizados: ${data.imported} creados, ${data.updated} actualizados`)
-        router.refresh()
-      } else {
-        toast.error("Error al sincronizar planes")
-      }
-    } catch {
-      toast.error("Error de conexión al sincronizar")
-    } finally {
-      setSyncing(false)
-    }
-  }
-
   const currentDate = new Date().toLocaleDateString("es-EC", {
     weekday: "long",
     year: "numeric",
@@ -303,20 +277,6 @@ export function DashboardClient({ stats }: { stats: Stats }) {
           </div>
 
           <div className="grid gap-2">
-            <Button
-              onClick={handleSyncPlans}
-              disabled={syncing}
-              className="w-full justify-start text-xs border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 rounded-lg shadow-sm"
-              variant="outline"
-            >
-              {syncing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin text-red-600" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4 text-red-600" />
-              )}
-              Sincronizar planes
-            </Button>
-
             <Link href="/admin/whatsapp">
               <Button
                 className="w-full justify-start text-xs border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 rounded-lg shadow-sm"

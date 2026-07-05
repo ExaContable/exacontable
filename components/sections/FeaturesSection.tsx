@@ -72,9 +72,6 @@ const features = [
   },
 ];
 
-const PER_PAGE = 3;
-const totalPages = Math.ceil(features.length / PER_PAGE);
-
 const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
   center: { opacity: 1, x: 0 },
@@ -85,6 +82,28 @@ export function FeaturesSection() {
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
+  const [perPage, setPerPage] = useState(1);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth < 640) {
+        setPerPage(1);
+      } else if (window.innerWidth < 1024) {
+        setPerPage(2);
+      } else {
+        setPerPage(3);
+      }
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const totalPages = Math.ceil(features.length / perPage);
+
+  useEffect(() => {
+    setPage((prev) => Math.min(prev, totalPages - 1));
+  }, [totalPages]);
 
   const goTo = useCallback((i: number) => {
     setDirection(i > page ? 1 : -1);
@@ -94,12 +113,12 @@ export function FeaturesSection() {
   const next = useCallback(() => {
     setDirection(1);
     setPage((prev) => (prev + 1) % totalPages);
-  }, []);
+  }, [totalPages]);
 
   const prev = useCallback(() => {
     setDirection(-1);
     setPage((prev) => (prev - 1 + totalPages) % totalPages);
-  }, []);
+  }, [totalPages]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -107,8 +126,8 @@ export function FeaturesSection() {
     return () => clearInterval(interval);
   }, [isPaused, next]);
 
-  const start = page * PER_PAGE;
-  const visibleFeatures = features.slice(start, start + PER_PAGE);
+  const start = page * perPage;
+  const visibleFeatures = features.slice(start, start + perPage);
 
   return (
     <section id="caracteristicas" className="scroll-mt-20 pt-40 pb-36 relative overflow-hidden bg-[#8B1E21]">

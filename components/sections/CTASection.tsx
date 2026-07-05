@@ -44,15 +44,7 @@ export function CTASection() {
                 <ArrowRight className="h-4 w-4 transition-all duration-300 group-hover:translate-x-1" />
               </Button>
             </a>
-            <Link href="/#contacto">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/20 rounded-full hover:bg-white/10 text-white font-semibold px-6"
-              >
-                Hablar con un asesor
-              </Button>
-            </Link>
+
           </div>
 
           <div className="mt-10 flex items-center justify-center gap-6 text-xs text-white/50 flex-wrap">

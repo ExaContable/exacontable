@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +23,6 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
-  RefreshCw,
   Loader2,
   Package,
 } from "lucide-react"
@@ -35,6 +34,13 @@ const categoryLabels: Record<string, string> = {
   "facturacion-electronica": "Facturación Electrónica",
   "servicios": "Servicios",
 }
+
+const categoryTabs = [
+  { value: "todas", label: "Todas" },
+  { value: "sistema-contable", label: "Sistema Contable" },
+  { value: "facturacion-electronica", label: "Facturación Electrónica" },
+  { value: "servicios", label: "Servicios" },
+]
 
 const periodLabels: Record<string, string> = {
   mensual: "/ mes",
@@ -58,26 +64,16 @@ interface Plan {
 export function PlansClient({ plans: initialPlans }: { plans: Plan[] }) {
   const router = useRouter()
   const [plans, setPlans] = useState(initialPlans)
-  const [syncing, setSyncing] = useState(false)
+  const [activeTab, setActiveTab] = useState("todas")
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  async function handleSync() {
-    setSyncing(true)
-    try {
-      const res = await fetch("/api/admin/plans/sync", { method: "POST" })
-      if (res.ok) {
-        const data = await res.json()
-        toast.success(`Planes sincronizados: ${data.imported} creados, ${data.updated} actualizados`)
-        router.refresh()
-      } else {
-        toast.error("Error al sincronizar")
-      }
-    } catch {
-      toast.error("Error de conexión al sincronizar")
-    } finally {
-      setSyncing(false)
-    }
-  }
+  const filteredPlans = useMemo(
+    () =>
+      activeTab === "todas"
+        ? plans
+        : plans.filter((p) => p.category === activeTab),
+    [plans, activeTab]
+  )
 
   async function handleDelete(id: string) {
     if (!confirm("¿Estás seguro de eliminar este plan?")) return
@@ -110,7 +106,7 @@ export function PlansClient({ plans: initialPlans }: { plans: Plan[] }) {
             Planes y Precios
           </h2>
           <p className="text-xs text-zinc-550">
-            {plans.length} plan{plans.length !== 1 && "es"} importados en total
+            {plans.length} plan{plans.length !== 1 && "es"} en total
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -123,8 +119,31 @@ export function PlansClient({ plans: initialPlans }: { plans: Plan[] }) {
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-zinc-100/50">
+      {/* Category Tabs */}
+      <div className="flex items-center gap-1 border-b border-zinc-200 overflow-x-auto">
+        {categoryTabs.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setActiveTab(tab.value)}
+            className={`relative px-4 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors ${
+              activeTab === tab.value
+                ? "text-red-650"
+                : "text-zinc-500 hover:text-zinc-800"
+            }`}
+          >
+            {tab.label}
+            {activeTab === tab.value && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-650 rounded-full" />
+            )}
+          </button>
+        ))}
+        <div className="ml-auto text-[10px] text-zinc-400 font-medium px-2">
+          {filteredPlans.length} plan{filteredPlans.length !== 1 && "es"}
+        </div>
+      </div>
+
+      {/* Desktop Table */}
+      <div className="hidden sm:block rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-zinc-100/50">
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-200 hover:bg-transparent bg-zinc-50">
@@ -136,17 +155,17 @@ export function PlansClient({ plans: initialPlans }: { plans: Plan[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {plans.length === 0 ? (
+            {filteredPlans.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
                   className="py-16 text-center text-xs text-zinc-500 font-medium"
                 >
-                  No hay planes aún. Sincroniza desde WooCommerce o crea uno nuevo.
+                  No hay planes en esta categoría. Crea uno nuevo.
                 </TableCell>
               </TableRow>
             ) : (
-              plans.map((plan) => {
+              filteredPlans.map((plan) => {
                 let badgeColor = "bg-neutral-500/10 text-neutral-450 border-neutral-500/20"
                 if (plan.category === "sistema-contable") {
                   badgeColor = "bg-blue-50 text-blue-600 border-blue-200"
@@ -233,6 +252,91 @@ export function PlansClient({ plans: initialPlans }: { plans: Plan[] }) {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile list */}
+      <div className="sm:hidden space-y-2">
+        {filteredPlans.length === 0 ? (
+          <p className="py-8 text-center text-xs text-zinc-500 font-medium">
+            No hay planes en esta categoría. Crea uno nuevo.
+          </p>
+        ) : (
+          filteredPlans.map((plan) => {
+            let badgeColor = "bg-neutral-500/10 text-neutral-450 border-neutral-500/20"
+            if (plan.category === "sistema-contable") {
+              badgeColor = "bg-blue-50 text-blue-600 border-blue-200"
+            } else if (plan.category === "facturacion-electronica") {
+              badgeColor = "bg-purple-50 text-purple-600 border-purple-200"
+            } else if (plan.category === "servicios") {
+              badgeColor = "bg-red-55 text-red-650 border-red-200"
+            }
+
+            return (
+              <div
+                key={plan.id}
+                className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm shadow-zinc-100/50"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-zinc-900 truncate">
+                      {plan.name}
+                    </p>
+                    <p className="text-[10px] text-zinc-450 font-mono truncate mt-0.5">
+                      {plan.slug}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => router.push(`/admin/planes/nuevo?id=${plan.id}`)}
+                      className="h-8 w-8 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(plan.id)}
+                      disabled={deleting === plan.id}
+                      className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                    >
+                      {deleting === plan.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge
+                    variant="outline"
+                    className={`${badgeColor} text-[9px] px-1.5 py-0 font-bold`}
+                  >
+                    {categoryLabels[plan.category] || plan.category}
+                  </Badge>
+                  <Badge
+                    className={
+                      plan.isActive
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-250 text-[9px] font-bold"
+                        : "bg-zinc-100 text-zinc-500 border-zinc-200 text-[9px] font-bold"
+                    }
+                    variant="outline"
+                  >
+                    {plan.isActive ? "Activo" : "Inactivo"}
+                  </Badge>
+                </div>
+                <p className="text-xs font-mono font-bold text-zinc-900 mt-2">
+                  ${plan.price.toFixed(2)}
+                  <span className="text-[10px] text-zinc-500 font-sans font-normal ml-1">
+                    {periodLabels[plan.period] || ""}
+                  </span>
+                </p>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

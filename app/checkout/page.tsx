@@ -154,7 +154,8 @@ export default function CheckoutPage() {
   }, [form]);
 
   const paymentMethod = form.watch("payment_method");
-  const bacsAccounts = paymentMethods.find((m) => m.id === "bacs")?.accounts;
+  const selectedMethod = paymentMethods.find((m) => m.id === paymentMethod);
+  const hasAccounts = selectedMethod?.accounts && selectedMethod.accounts.length > 0;
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -564,7 +565,6 @@ export default function CheckoutPage() {
                       <p className="text-sm text-zinc-500">No hay métodos de pago disponibles.</p>
                     ) : (
                       paymentMethods.map((method) => {
-                        const Icon = method.id === "bacs" ? Building2 : CreditCard;
                         const isSelected = paymentMethod === method.id;
                         return (
                           <label
@@ -592,17 +592,21 @@ export default function CheckoutPage() {
                               "flex h-10 w-10 items-center justify-center rounded-lg transition-all",
                               isSelected ? "bg-red-600 text-white" : "bg-zinc-100 text-zinc-500"
                             )}>
-                              <Icon className="h-5 w-5" />
+                              {method.accounts ? (
+                                <Building2 className="h-5 w-5" />
+                              ) : (
+                                <CreditCard className="h-5 w-5" />
+                              )}
                             </div>
                             <div>
                               <p className={cn("font-bold transition-all", isSelected ? "text-red-600" : "text-zinc-900")}>
                                 {method.title}
                               </p>
-                              <p className="text-xs text-zinc-500 mt-0.5">
-                                {method.id === "bacs"
-                                  ? "Banco Pichincha — Paga con transferencia bancaria"
-                                  : "Paga con tarjeta de crédito o débito"}
-                              </p>
+                              {method.description && (
+                                <p className="text-xs text-zinc-500 mt-0.5">
+                                  {method.description}
+                                </p>
+                              )}
                             </div>
                             {isSelected && (
                               <motion.div
@@ -619,7 +623,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  {paymentMethod === "bacs" && (
+                  {hasAccounts && selectedMethod && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -636,30 +640,24 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="space-y-2.5">
-                        {bacsAccounts && bacsAccounts.length > 0 ? (
-                          bacsAccounts.map((account, i) => (
-                            <div key={i} className="rounded-lg border border-zinc-200 bg-white p-3.5 space-y-2">
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div>
-                                  <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Banco</span>
-                                  <p className="font-semibold text-zinc-900">{account.bank_name}</p>
-                                </div>
-                                <div>
-                                  <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Titular</span>
-                                  <p className="font-semibold text-zinc-900">{account.account_name}</p>
-                                </div>
-                                <div className="col-span-2">
-                                  <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">N° Cuenta</span>
-                                  <p className="font-mono font-bold text-zinc-900 text-base tracking-wider">{account.account_number}</p>
-                                </div>
+                        {selectedMethod.accounts!.map((account, i) => (
+                          <div key={i} className="rounded-lg border border-zinc-200 bg-white p-3.5 space-y-2">
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Banco</span>
+                                <p className="font-semibold text-zinc-900">{account.bank_name}</p>
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Titular</span>
+                                <p className="font-semibold text-zinc-900">{account.account_name}</p>
+                              </div>
+                              <div className="col-span-2">
+                                <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">N° Cuenta</span>
+                                <p className="font-mono font-bold text-zinc-900 text-base tracking-wider">{account.account_number}</p>
                               </div>
                             </div>
-                          ))
-                        ) : (
-                          <div className="rounded-lg border border-zinc-200 bg-white p-3.5">
-                            <p className="text-xs text-zinc-500">Los datos bancarios se mostrarán aquí. Contacta a soporte si no ves la información.</p>
                           </div>
-                        )}
+                        ))}
                       </div>
 
                       <div className="flex items-start gap-3 rounded-lg border border-dashed border-red-500/20 bg-red-50/50 p-3.5">
@@ -739,19 +737,23 @@ export default function CheckoutPage() {
                   {formatPrice(cart.totals.total_price, cart.totals.currency_prefix)}
                 </span>
               </div>
-              <div className="mt-4 rounded-lg bg-zinc-50 p-3 border border-zinc-100">
-                <p className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Métodos aceptados</p>
-                <div className="mt-1.5 space-y-1">
-                  <p className="flex items-center gap-2 text-xs text-zinc-600">
-                    <Building2 className="h-3.5 w-3.5 text-red-500/60 shrink-0" />
-                    Transferencia Bancaria (Banco Pichincha)
-                  </p>
-                  <p className="flex items-center gap-2 text-xs text-zinc-600">
-                    <CreditCard className="h-3.5 w-3.5 text-red-500/60 shrink-0" />
-                    Tarjetas de Crédito / Débito (Payphone)
-                  </p>
+              {paymentMethods.length > 0 && (
+                <div className="mt-4 rounded-lg bg-zinc-50 p-3 border border-zinc-100">
+                  <p className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Métodos aceptados</p>
+                  <div className="mt-1.5 space-y-1">
+                    {paymentMethods.map((m) => (
+                      <p key={m.id} className="flex items-center gap-2 text-xs text-zinc-600">
+                        {m.accounts ? (
+                          <Building2 className="h-3.5 w-3.5 text-red-500/60 shrink-0" />
+                        ) : (
+                          <CreditCard className="h-3.5 w-3.5 text-red-500/60 shrink-0" />
+                        )}
+                        {m.title}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -163,11 +163,27 @@ export function Navbar() {
               >
                 <Mail className="h-4 w-4" />
               </a>
+              <a
+                href="https://exa.ofsercont.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(buttonVariants({ variant: "default", size: "sm" }), "ml-2 rounded-full")}
+              >
+                Portal Cliente
+              </a>
             </motion.li>
           </motion.ul>
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
+          <a
+            href="https://exa.ofsercont.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(buttonVariants({ variant: "default", size: "sm" }), "rounded-full")}
+          >
+            Portal Cliente
+          </a>
           <Button
             variant="ghost"
             size="icon"

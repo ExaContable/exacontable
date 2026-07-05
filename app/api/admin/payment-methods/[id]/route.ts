@@ -24,6 +24,32 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const existing = await prisma.paymentMethod.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Método de pago no encontrado" },
+        { status: 404 }
+      )
+    }
+
+    await prisma.paymentMethod.delete({ where: { id } })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting payment method:", error)
+    return NextResponse.json(
+      { error: "Error al eliminar método de pago" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

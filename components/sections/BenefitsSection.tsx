@@ -61,9 +61,6 @@ const testimonials = [
   },
 ];
 
-const PER_PAGE = 3;
-const totalPages = Math.ceil(testimonials.length / PER_PAGE);
-
 const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
   center: { opacity: 1, x: 0 },
@@ -74,6 +71,28 @@ export function BenefitsSection() {
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
+  const [perPage, setPerPage] = useState(1);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth < 640) {
+        setPerPage(1);
+      } else if (window.innerWidth < 1024) {
+        setPerPage(2);
+      } else {
+        setPerPage(3);
+      }
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const totalPages = Math.ceil(testimonials.length / perPage);
+
+  useEffect(() => {
+    setPage((prev) => Math.min(prev, totalPages - 1));
+  }, [totalPages]);
 
   const goTo = useCallback((i: number) => {
     setDirection(i > page ? 1 : -1);
@@ -83,12 +102,12 @@ export function BenefitsSection() {
   const next = useCallback(() => {
     setDirection(1);
     setPage((prev) => (prev + 1) % totalPages);
-  }, []);
+  }, [totalPages]);
 
   const prev = useCallback(() => {
     setDirection(-1);
     setPage((prev) => (prev - 1 + totalPages) % totalPages);
-  }, []);
+  }, [totalPages]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -96,8 +115,8 @@ export function BenefitsSection() {
     return () => clearInterval(interval);
   }, [isPaused, next]);
 
-  const start = page * PER_PAGE;
-  const visibleTestimonials = testimonials.slice(start, start + PER_PAGE);
+  const start = page * perPage;
+  const visibleTestimonials = testimonials.slice(start, start + perPage);
 
   return (
     <section id="testimonios" className="scroll-mt-20 pt-32 pb-32 relative overflow-hidden bg-[#8B1E21]">

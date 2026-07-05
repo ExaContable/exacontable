@@ -26,6 +26,7 @@ import {
   Eye,
   Search,
   ShoppingBag,
+  ChevronRight,
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -152,8 +153,8 @@ export function OrdersClient({
         </div>
       </div>
 
-      {/* Grid Table */}
-      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-zinc-100/50">
+      {/* Desktop Table */}
+      <div className="hidden sm:block rounded-xl border border-zinc-200 bg-white overflow-hidden shadow-sm shadow-zinc-100/50">
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-200 hover:bg-transparent bg-zinc-50">
@@ -232,6 +233,59 @@ export function OrdersClient({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile list */}
+      <div className="sm:hidden space-y-2">
+        {filtered.length === 0 ? (
+          <p className="py-8 text-center text-xs text-zinc-500 font-medium">
+            No se encontraron órdenes registradas.
+          </p>
+        ) : (
+          filtered.map((order) => {
+            const statusConfig = statusLabels[order.status] || {
+              label: order.status,
+              color: "bg-neutral-500/10 text-neutral-450 border-neutral-500/20",
+            }
+            return (
+              <Link
+                key={order.id}
+                href={`/admin/ordenes/${order.id}`}
+                className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-3 hover:bg-zinc-50 transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-zinc-900 truncate">
+                    {order.customerName}
+                  </p>
+                  <p className="text-xs text-zinc-500 truncate">
+                    {order.planName}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-mono font-bold text-zinc-900">
+                      ${order.total.toFixed(2)}
+                    </span>
+                    <Badge variant="outline" className={`${statusConfig.color} text-[9px] px-1.5 py-0 font-bold`}>
+                      {statusConfig.label}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-zinc-400">
+                      {order.paymentMethod || "-"}
+                    </span>
+                    <span className="text-[10px] text-zinc-300">•</span>
+                    <span className="text-[10px] text-zinc-400">
+                      {new Date(order.createdAt).toLocaleDateString("es-EC", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0 ml-2" />
+              </Link>
+            )
+          })
+        )}
       </div>
     </div>
   )
