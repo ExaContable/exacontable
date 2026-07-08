@@ -55,7 +55,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-zinc-200/80 transition-all duration-300",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-zinc-200/80 transition-all duration-300 overflow-hidden",
           collapsed ? "w-16" : "w-64",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
@@ -103,7 +103,7 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
           )}
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto p-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-2 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-300 [&::-webkit-scrollbar-track]:bg-transparent">
           {menuItems.map((item) => {
             const isActive = pathname === item.href
             return (

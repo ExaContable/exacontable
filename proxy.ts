@@ -9,22 +9,28 @@ const JWT_SECRET = new TextEncoder().encode(
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname === "/admin/login") {
+  if (
+    pathname === "/admin/login" ||
+    pathname.startsWith("/api/auth")
+  ) {
     return NextResponse.next()
   }
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     const token = request.cookies.get("admin_session")?.value
 
     if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", request.url))
+      const loginUrl = new URL("/admin/login", request.url)
+      loginUrl.searchParams.set("redirect", pathname)
+      return NextResponse.redirect(loginUrl)
     }
 
     try {
       jwtVerify(token, JWT_SECRET)
       return NextResponse.next()
     } catch {
-      return NextResponse.redirect(new URL("/admin/login", request.url))
+      const loginUrl = new URL("/admin/login", request.url)
+      return NextResponse.redirect(loginUrl)
     }
   }
 
@@ -32,5 +38,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 }

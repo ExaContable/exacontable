@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import { SignJWT } from "jose"
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback-dev-secret-change-in-production"
-)
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@exacontable.com"
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || ""
+import { isAdminEmail, verifyPassword, createSession } from "@/lib/auth"
 
 export async function POST(request: Request) {
   try {
@@ -20,14 +12,14 @@ export async function POST(request: Request) {
       )
     }
 
-    if (email !== ADMIN_EMAIL) {
+    if (!isAdminEmail(email)) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
         { status: 401 }
       )
     }
 
-    const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH)
+    const valid = await verifyPassword(password)
     if (!valid) {
       return NextResponse.json(
         { error: "Credenciales inválidas" },
@@ -35,11 +27,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const token = await new SignJWT({ role: "admin" })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("24h")
-      .sign(JWT_SECRET)
+    const token = await createSession()
 
     const response = NextResponse.json({ success: true })
     response.cookies.set("admin_session", token, {
