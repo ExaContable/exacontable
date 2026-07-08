@@ -333,10 +333,10 @@ export default function LoginPage() {
                   type="submit"
                   disabled={loading}
                   className={cn(
-                    "relative w-full h-12 overflow-hidden",
-                    "bg-red-600 text-white",
-                    "shadow-[0_4px_20px_rgba(220,76,30,0.2)]",
-                    "hover:bg-red-500 hover:shadow-[0_6px_28px_rgba(220,76,30,0.35)]",
+                    "relative w-full h-12 rounded-full",
+                    "bg-primary text-primary-foreground",
+                    "shadow-[0_0_24px_-4px_color-mix(in_oklab,var(--primary)_50%,transparent)]",
+                    "hover:bg-primary/90 hover:shadow-[0_0_32px_-2px_color-mix(in_oklab,var(--primary)_60%,transparent)]",
                     "active:scale-[0.98]",
                     "disabled:opacity-60 disabled:active:scale-100",
                     "transition-all duration-200",
