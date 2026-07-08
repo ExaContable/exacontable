@@ -169,13 +169,14 @@ export default function LoginPage() {
               variants={itemVariants}
               initial="hidden"
               animate="visible"
+              className="flex justify-center w-full"
             >
               <Image
                 src="/logo-rojo.png"
                 alt="EXA Contable"
-                width={160}
-                height={48}
-                className="h-12 w-auto"
+                width={200}
+                height={60}
+                className="h-14 w-auto mx-auto"
                 priority
               />
             </motion.div>
