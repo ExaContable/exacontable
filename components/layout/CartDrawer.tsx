@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 
 import { usePathname } from "next/navigation";
 
@@ -40,6 +40,7 @@ export function CartDrawer() {
   };
 
   return (
+    <LazyMotion features={domAnimation}>
     <Sheet open={isOpen} onOpenChange={setOpen}>
       <SheetContent className="flex w-full flex-col sm:max-w-md gap-0 p-0">
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border/50">
@@ -80,7 +81,7 @@ export function CartDrawer() {
             <ScrollArea className="flex-1 px-5 py-4">
               <AnimatePresence mode="popLayout">
                 {cart.items.map((item) => (
-                  <motion.div
+                  <m.div
                     key={item.key}
                     layout
                     variants={itemVariants}
@@ -151,7 +152,7 @@ export function CartDrawer() {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
-                  </motion.div>
+                  </m.div>
                 ))}
               </AnimatePresence>
             </ScrollArea>
@@ -214,5 +215,6 @@ export function CartDrawer() {
         )}
       </SheetContent>
     </Sheet>
+    </LazyMotion>
   );
 }

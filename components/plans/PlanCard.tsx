@@ -2,7 +2,7 @@
 
 import { Check, ShoppingCart, Zap, Rocket, Crown, Infinity } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import type { StoreProduct } from "@/types";
 import { useCart } from "@/hooks/use-cart";
@@ -207,26 +207,36 @@ function parseFeatures(name: string, description: string, slug: string): string[
 interface PlanCardProps {
   product: StoreProduct;
   index?: number;
+  features?: string[];
+  description?: string | null;
+  period?: string;
 }
 
-export function PlanCard({ product, index = 0 }: PlanCardProps) {
+export function PlanCard({ product, index = 0, features: propFeatures, description: propDescription, period: periodProp }: PlanCardProps) {
   if (!product) return null;
 
   const { addItem, loading } = useCart();
-  const features = parseFeatures(product.name, product.description, product.slug);
+  const features = Array.isArray(propFeatures) && propFeatures.length > 0
+    ? propFeatures.slice(0, 8)
+    : parseFeatures(product.name, propDescription || product.description, product.slug);
   const priceMinorUnits = parseInt(product.prices.price);
   const divisor = Math.pow(10, product.prices.currency_minor_unit || 2);
   const price = priceMinorUnits / divisor;
 
   const isCompraTotal = product.slug.includes("compra-total");
-  const periodLabel = isCompraTotal
+  const periodLabel = periodProp
+    ? periodProp === "compra-total" ? "Pago Unico"
+      : periodProp === "mensual" ? "/Mes"
+      : "/Anual"
+    : isCompraTotal
     ? "Pago Unico"
     : product.name.toLowerCase().includes("mensual")
     ? "/Mes"
     : "/Anual";
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation}>
+    <m.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -281,6 +291,7 @@ export function PlanCard({ product, index = 0 }: PlanCardProps) {
             Comprar Plan
           </Button>
       </div>
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   );
 }

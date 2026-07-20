@@ -2,18 +2,19 @@
 
 import { FileText, ArrowRight, ShieldCheck, Zap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 import Link from "next/link";
 
 export function SrilntegrationSection() {
   return (
+    <LazyMotion features={domAnimation}>
     <section className="relative py-24 overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background border-t border-border/10">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(220,76,30,0.03),transparent_60%)] -z-10" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
           
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -82,9 +83,9 @@ export function SrilntegrationSection() {
                 </Button>
               </Link>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -103,13 +104,13 @@ export function SrilntegrationSection() {
                     <p className="text-[10px] text-muted-foreground">Servicio Web Autorización</p>
                   </div>
                 </div>
-                <motion.span
+                <m.span
                   animate={{ opacity: [1, 0.6, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-500 uppercase"
                 >
                   En línea
-                </motion.span>
+                </m.span>
               </div>
 
               <div className="my-8 space-y-4 flex-1 flex flex-col justify-center">
@@ -145,10 +146,11 @@ export function SrilntegrationSection() {
                 <span className="font-bold text-foreground">Éxito 100%</span>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

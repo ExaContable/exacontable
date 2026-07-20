@@ -37,6 +37,7 @@ const statusLabels: Record<string, string> = {
 
 interface EmailOrder {
   id: string;
+  orderNumber?: number;
   customerName: string;
   customerEmail: string;
   planName: string;
@@ -46,8 +47,13 @@ interface EmailOrder {
   usuario?: string | null;
 }
 
+function formatOrderNumber(order: EmailOrder): string {
+  return order.orderNumber ? `EXA-${String(order.orderNumber).padStart(4, "0")}` : `#${order.id.slice(0, 8)}`;
+}
+
 export async function sendOrderEmail(order: EmailOrder) {
   const transporter = getTransporter();
+  const orderNumberStr = formatOrderNumber(order);
   const orderUrl = `${SITE_URL}/mis-pedidos/${order.id}`;
 
   const isBacs = order.paymentMethod?.toLowerCase().includes("transferencia") || order.paymentMethod?.toLowerCase().includes("bacs");
@@ -113,7 +119,7 @@ export async function sendOrderEmail(order: EmailOrder) {
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin: 25px 0; padding: 20px;">
                   <tr>
                     <td style="padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #121214;">Pedido ID:</td>
-                    <td style="padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-family: monospace; font-size: 14px; color: #4b5563;">#${order.id}</td>
+                    <td style="padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-family: monospace; font-size: 14px; color: #4b5563;">${orderNumberStr}</td>
                   </tr>
                   <tr>
                     <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #121214;">Plan Adquirido:</td>
@@ -160,7 +166,7 @@ export async function sendOrderEmail(order: EmailOrder) {
   
   Tu orden ha sido recibida de forma local.
   Detalles de tu pedido:
-  - Pedido ID: #${order.id}
+  - Pedido ID: ${orderNumberStr}
   - Plan: ${order.planName}
   - Método de Pago: ${order.paymentMethod}
   - Estado: ${statusLabels[order.status] || order.status}
@@ -175,7 +181,7 @@ export async function sendOrderEmail(order: EmailOrder) {
       await transporter.sendMail({
         from: SMTP_FROM,
         to: order.customerEmail,
-        subject: `Confirmación de Pedido #${order.id.slice(0, 8)} - EXA Contable`,
+        subject: `Confirmación de Pedido ${orderNumberStr} - EXA Contable`,
         text: textContent,
         html: htmlContent,
       });
@@ -184,7 +190,7 @@ export async function sendOrderEmail(order: EmailOrder) {
       await transporter.sendMail({
         from: SMTP_FROM,
         to: ADMIN_EMAIL,
-        subject: `[ADMIN] Nueva Orden de Compra #${order.id.slice(0, 8)}`,
+        subject: `[ADMIN] Nueva Orden de Compra ${orderNumberStr}`,
         text: `Se ha creado una nueva orden en el sistema.\n\nCliente: ${order.customerName}\nEmail: ${order.customerEmail}\nPlan: ${order.planName}\nTotal: $${order.total.toFixed(2)}\n\nVer pedido: ${SITE_URL}/admin/ordenes/${order.id}`,
       });
       console.log(`Email notifications sent for order ${order.id}`);
@@ -194,7 +200,7 @@ export async function sendOrderEmail(order: EmailOrder) {
   } else {
     console.log("=== MOCK EMAIL (Order Created) ===");
     console.log(`To: ${order.customerEmail}`);
-    console.log(`Subject: Confirmación de Pedido #${order.id.slice(0, 8)}`);
+    console.log(`Subject: Confirmación de Pedido ${orderNumberStr}`);
     console.log(textContent);
     console.log("==================================");
   }
@@ -202,6 +208,7 @@ export async function sendOrderEmail(order: EmailOrder) {
 
 export async function sendOrderStatusEmail(order: EmailOrder) {
   const transporter = getTransporter();
+  const orderNumberStr = formatOrderNumber(order);
   const orderUrl = `${SITE_URL}/mis-pedidos/${order.id}`;
 
   const htmlContent = `
@@ -243,7 +250,7 @@ export async function sendOrderStatusEmail(order: EmailOrder) {
                 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px; line-height: 2; margin-bottom: 25px; color: #4b5563;">
                   <tr>
                     <td style="font-weight: bold; width: 150px;">Pedido ID:</td>
-                    <td style="font-family: monospace;">#${order.id}</td>
+                    <td style="font-family: monospace;">${orderNumberStr}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: bold;">Plan Adquirido:</td>
@@ -287,7 +294,7 @@ export async function sendOrderStatusEmail(order: EmailOrder) {
 
   const textContent = `
   Hola ${order.customerName},
-  El estado de tu pedido #${order.id} ha cambiado a: ${statusLabels[order.status] || order.status}.
+  El estado de tu pedido ${orderNumberStr} ha cambiado a: ${statusLabels[order.status] || order.status}.
   
   Detalles del pedido:
   - Plan: ${order.planName}
@@ -301,7 +308,7 @@ export async function sendOrderStatusEmail(order: EmailOrder) {
       await transporter.sendMail({
         from: SMTP_FROM,
         to: order.customerEmail,
-        subject: `Actualización de Estado - Pedido #${order.id.slice(0, 8)}`,
+        subject: `Actualización de Estado - Pedido ${orderNumberStr}`,
         text: textContent,
         html: htmlContent,
       });
@@ -312,7 +319,7 @@ export async function sendOrderStatusEmail(order: EmailOrder) {
   } else {
     console.log("=== MOCK EMAIL (Status Updated) ===");
     console.log(`To: ${order.customerEmail}`);
-    console.log(`Subject: Actualización de Estado - Pedido #${order.id.slice(0, 8)}`);
+    console.log(`Subject: Actualización de Estado - Pedido ${orderNumberStr}`);
     console.log(textContent);
     console.log("====================================");
   }

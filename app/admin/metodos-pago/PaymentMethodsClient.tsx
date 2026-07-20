@@ -60,12 +60,17 @@ export function PaymentMethodsClient({
   const [editBankName, setEditBankName] = useState("")
   const [editAccountName, setEditAccountName] = useState("")
   const [editAccountNumber, setEditAccountNumber] = useState("")
+  const [editAccountRuc, setEditAccountRuc] = useState("")
   const [showNew, setShowNew] = useState(false)
   const [newName, setNewName] = useState("")
   const [newCode, setNewCode] = useState("")
   const [newDescription, setNewDescription] = useState("")
   const [newCommission, setNewCommission] = useState("")
   const [newIsSandbox, setNewIsSandbox] = useState(true)
+  const [newBankName, setNewBankName] = useState("")
+  const [newAccountName, setNewAccountName] = useState("")
+  const [newAccountNumber, setNewAccountNumber] = useState("")
+  const [newAccountRuc, setNewAccountRuc] = useState("")
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<PaymentMethod | null>(null)
@@ -125,12 +130,18 @@ export function PaymentMethodsClient({
     if (!editingConfig) return
     try {
       let updatedConfig = configForm
-      // If bank fields were filled, auto-build the JSON config
-      if (editBankName || editAccountName || editAccountNumber) {
+      // If bank fields were filled, merge them into existing config
+      if (editBankName || editAccountName || editAccountNumber || editAccountRuc) {
+        let existingConfig: Record<string, string> = {}
+        try {
+          existingConfig = JSON.parse(configForm || "{}")
+        } catch {}
         const bankConfig = {
-          bank_name: editBankName,
-          account_name: editAccountName,
-          account_number: editAccountNumber,
+          ...existingConfig,
+          bank_name: editBankName || existingConfig.bank_name || "",
+          account_name: editAccountName || existingConfig.account_name || "",
+          account_number: editAccountNumber || existingConfig.account_number || "",
+          account_ruc: editAccountRuc || existingConfig.account_ruc || "",
         }
         updatedConfig = JSON.stringify(bankConfig)
       }
@@ -179,6 +190,19 @@ export function PaymentMethodsClient({
     }
     setCreating(true)
     try {
+      let config = null
+      if (newBankName || newAccountName || newAccountNumber) {
+        const bankConfig: Record<string, string> = {
+          bank_name: newBankName,
+          account_name: newAccountName,
+          account_number: newAccountNumber,
+        }
+        if (newAccountRuc) {
+          bankConfig.account_ruc = newAccountRuc
+        }
+        config = JSON.stringify(bankConfig)
+      }
+
       const res = await fetch("/api/admin/payment-methods", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -188,6 +212,7 @@ export function PaymentMethodsClient({
           description: newDescription || null,
           commission: newCommission || null,
           isSandbox: newIsSandbox,
+          config,
         }),
       })
       if (res.ok) {
@@ -199,6 +224,10 @@ export function PaymentMethodsClient({
         setNewDescription("")
         setNewCommission("")
         setNewIsSandbox(true)
+        setNewBankName("")
+        setNewAccountName("")
+        setNewAccountNumber("")
+        setNewAccountRuc("")
         toast.success("Método de pago creado con éxito")
       } else {
         const data = await res.json()
@@ -254,7 +283,7 @@ export function PaymentMethodsClient({
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Método
             </DialogTrigger>
-            <DialogContent className="border-zinc-200 bg-white text-zinc-900 max-w-sm">
+            <DialogContent className="border-zinc-200 bg-white text-zinc-900 sm:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden">
               <DialogHeader>
                 <DialogTitle className="text-zinc-955 font-heading font-bold">Nuevo Gateway de Pago</DialogTitle>
                 <DialogDescription className="text-zinc-500 text-xs">
@@ -316,6 +345,49 @@ export function PaymentMethodsClient({
                     </Select>
                   </div>
                 </div>
+
+                <div className="border-t border-zinc-200 pt-3">
+                  <p className="text-xs font-semibold text-zinc-700 mb-2">Cuenta bancaria (para transferencias)</p>
+                  <div className="space-y-2.5">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] text-zinc-500 font-semibold">Banco</Label>
+                      <Input
+                        value={newBankName}
+                        onChange={(e) => setNewBankName(e.target.value)}
+                        placeholder="Ej: Banco Pichincha"
+                        className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-red-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] text-zinc-500 font-semibold">Titular de la cuenta</Label>
+                      <Input
+                        value={newAccountName}
+                        onChange={(e) => setNewAccountName(e.target.value)}
+                        placeholder="Ej: EXA CONTABLE"
+                        className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-red-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] text-zinc-500 font-semibold">Número de cuenta</Label>
+                      <Input
+                        value={newAccountNumber}
+                        onChange={(e) => setNewAccountNumber(e.target.value)}
+                        placeholder="Ej: 1234567890"
+                        className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 font-mono focus:border-red-500"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] text-zinc-500 font-semibold">RUC / Cédula del titular</Label>
+                      <Input
+                        value={newAccountRuc}
+                        onChange={(e) => setNewAccountRuc(e.target.value)}
+                        placeholder="Ej: 1799999999001"
+                        className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 font-mono focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <Button
                   onClick={handleCreate}
                   disabled={creating}
@@ -364,7 +436,12 @@ export function PaymentMethodsClient({
                         try {
                           const cfg = JSON.parse(method.config);
                           if (cfg.bank_name || cfg.account_number) {
-                            return <p className="text-[10px] text-blue-600 mt-0.5">🏦 {cfg.bank_name || ""} · {cfg.account_number || ""}</p>;
+                            return (
+                              <p className="text-[10px] text-blue-600 mt-0.5 leading-relaxed">
+                                🏦 {cfg.bank_name || ""} · {cfg.account_number || ""}
+                                {cfg.account_ruc && <span className="text-zinc-500"> · RUC: {cfg.account_ruc}</span>}
+                              </p>
+                            );
                           }
                         } catch {}
                         return null;
@@ -417,6 +494,7 @@ export function PaymentMethodsClient({
                             year: "numeric",
                             month: "short",
                             day: "numeric",
+                            timeZone: "America/Guayaquil",
                           })}
                         </span>
                       </div>
@@ -443,10 +521,12 @@ export function PaymentMethodsClient({
                             setEditBankName(cfg.bank_name || "")
                             setEditAccountName(cfg.account_name || "")
                             setEditAccountNumber(cfg.account_number || "")
+                            setEditAccountRuc(cfg.account_ruc || "")
                           } catch {
                             setEditBankName("")
                             setEditAccountName("")
                             setEditAccountNumber("")
+                            setEditAccountRuc("")
                           }
                         }}
                         className="text-zinc-450 hover:text-zinc-900 hover:bg-zinc-100 h-8 w-8 rounded-lg"
@@ -510,7 +590,12 @@ export function PaymentMethodsClient({
                     try {
                       const cfg = JSON.parse(method.config);
                       if (cfg.bank_name || cfg.account_number) {
-                        return <p className="text-[10px] text-blue-600 mt-0.5">🏦 {cfg.bank_name || ""} · {cfg.account_number || ""}</p>;
+                        return (
+                          <p className="text-[10px] text-blue-600 mt-0.5 leading-relaxed">
+                            🏦 {cfg.bank_name || ""} · {cfg.account_number || ""}
+                            {cfg.account_ruc && <span className="text-zinc-500"> · RUC: {cfg.account_ruc}</span>}
+                          </p>
+                        );
                       }
                     } catch {}
                     return null;
@@ -555,6 +640,7 @@ export function PaymentMethodsClient({
                       {new Date(method.lastValidatedAt).toLocaleDateString("es-EC", {
                         month: "short",
                         day: "numeric",
+                        timeZone: "America/Guayaquil",
                       })}
                     </>
                   ) : (
@@ -579,10 +665,12 @@ export function PaymentMethodsClient({
                         setEditBankName(cfg.bank_name || "")
                         setEditAccountName(cfg.account_name || "")
                         setEditAccountNumber(cfg.account_number || "")
+                        setEditAccountRuc(cfg.account_ruc || "")
                       } catch {
                         setEditBankName("")
                         setEditAccountName("")
                         setEditAccountNumber("")
+                        setEditAccountRuc("")
                       }
                     }}
                     className="h-7 w-7 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg"
@@ -622,7 +710,7 @@ export function PaymentMethodsClient({
         open={!!editingConfig}
         onOpenChange={(open) => !open && setEditingConfig(null)}
       >
-        <DialogContent className="border-zinc-200 bg-white text-zinc-900 max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="border-zinc-200 bg-white text-zinc-900 sm:max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle className="text-zinc-950 font-heading font-bold">Configurar {editingConfig?.name}</DialogTitle>
             <DialogDescription className="text-zinc-500 text-xs">
@@ -694,6 +782,15 @@ export function PaymentMethodsClient({
                     value={editAccountNumber}
                     onChange={(e) => setEditAccountNumber(e.target.value)}
                     placeholder="Ej: 1234567890"
+                    className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 font-mono focus:border-red-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] text-zinc-500 font-semibold">RUC / Cédula del titular</Label>
+                  <Input
+                    value={editAccountRuc}
+                    onChange={(e) => setEditAccountRuc(e.target.value)}
+                    placeholder="Ej: 1799999999001"
                     className="border-zinc-200 bg-white text-xs text-zinc-900 placeholder:text-zinc-400 font-mono focus:border-red-500"
                   />
                 </div>

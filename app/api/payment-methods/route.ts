@@ -18,6 +18,7 @@ export async function GET() {
                 account_name: configObj.account_name || "EXA CONTABLE",
                 account_number: configObj.account_number || "",
                 bank_name: configObj.bank_name || "Banco Pichincha",
+                account_ruc: configObj.account_ruc || "",
               },
             ];
           }
@@ -37,25 +38,6 @@ export async function GET() {
     return NextResponse.json(activeGateways);
   } catch (error) {
     console.error("Error fetching local payment gateways:", error);
-    // Hardcoded fallback in case database query fails
-    return NextResponse.json([
-      {
-        id: "bacs",
-        title: "Transferencia Bancaria Directa",
-        description: "Realiza tu transferencia bancaria y sube tu comprobante de pago.",
-        accounts: [
-          {
-            account_name: "EXA CONTABLE S.A.S.",
-            account_number: "1234567890",
-            bank_name: "Banco Pichincha",
-          },
-        ],
-      },
-      {
-        id: "payphonebox",
-        title: "PayPhone",
-        description: "Paga de forma segura con tu tarjeta de crédito o débito a través de PayPhone.",
-      },
-    ]);
+    return NextResponse.json([]);
   }
 }

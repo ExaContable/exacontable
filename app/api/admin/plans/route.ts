@@ -6,7 +6,11 @@ export async function GET() {
     const plans = await prisma.plan.findMany({
       orderBy: { sortOrder: "asc" },
     })
-    return NextResponse.json(plans)
+    const serialized = plans.map((p) => ({
+      ...p,
+      features: JSON.parse(p.features),
+    }))
+    return NextResponse.json(serialized)
   } catch (error) {
     console.error("Error fetching plans:", error)
     return NextResponse.json(
@@ -51,7 +55,10 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(plan, { status: 201 })
+    return NextResponse.json({
+      ...plan,
+      features: JSON.parse(plan.features),
+    }, { status: 201 })
   } catch (error) {
     console.error("Error creating plan:", error)
     return NextResponse.json(

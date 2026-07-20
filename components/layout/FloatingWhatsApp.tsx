@@ -2,7 +2,7 @@
 
 import { MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 import { usePathname } from "next/navigation";
@@ -17,8 +17,9 @@ export function FloatingWhatsApp() {
   if (pathname?.startsWith("/admin")) return null;
 
   return (
+    <LazyMotion features={domAnimation}>
     <AnimatePresence>
-      <motion.div
+      <m.div
         initial={{ scale: 0, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0, opacity: 0, y: 20 }}
@@ -27,7 +28,7 @@ export function FloatingWhatsApp() {
       >
         <AnimatePresence>
           {isOpen && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -84,7 +85,7 @@ export function FloatingWhatsApp() {
                   </div>
                 </a>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
@@ -100,7 +101,8 @@ export function FloatingWhatsApp() {
             <MessageCircle className="h-6 w-6" />
           )}
         </Button>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
+    </LazyMotion>
   );
 }

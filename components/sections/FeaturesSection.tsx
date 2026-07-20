@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FileText, ShoppingCart, Package, BarChart3, Shield, Clock, Eye, Zap, HeadphonesIcon, ArrowRight, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
 
@@ -130,10 +130,11 @@ export function FeaturesSection() {
   const visibleFeatures = features.slice(start, start + perPage);
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="caracteristicas" className="scroll-mt-20 pt-40 pb-36 relative overflow-hidden bg-[#8B1E21]">
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -149,11 +150,11 @@ export function FeaturesSection() {
           <p className="mt-4 text-base sm:text-lg text-white/70 max-w-xl mx-auto leading-relaxed">
             Todo lo que necesitas para gestionar la facturación e inventario de tu negocio en un solo sistema integrado y fácil de usar.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="relative mt-16">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/10 overflow-hidden rounded-full z-20">
-            <motion.div
+            <m.div
               key={`progress-${page}`}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
@@ -163,7 +164,7 @@ export function FeaturesSection() {
           </div>
 
           <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
+            <m.div
               key={page}
               custom={direction}
               variants={slideVariants}
@@ -226,7 +227,7 @@ export function FeaturesSection() {
                   </div>
                 </div>
               ))}
-            </motion.div>
+            </m.div>
           </AnimatePresence>
 
           <button
@@ -260,7 +261,7 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -275,8 +276,9 @@ export function FeaturesSection() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
-        </motion.div>
+        </m.div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

@@ -1,27 +1,41 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PlanToggle } from "@/components/plans/PlanToggle";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { CustomPlanBuilder } from "@/components/plans/CustomPlanBuilder";
 import { useProducts } from "@/hooks/use-products";
 import type { StoreProduct } from "@/types";
 import type { BillingPeriod } from "@/types";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { RefreshCw, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function filterByPeriod(products: StoreProduct[], period: BillingPeriod): StoreProduct[] {
+interface DbPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  category: string;
+  period: string;
+  features: string[];
+  isActive: boolean;
+  sortOrder: number;
+}
+
+function filterByPeriod(
+  products: StoreProduct[],
+  period: BillingPeriod,
+  periodMap: Record<string, string>
+): StoreProduct[] {
   return products.filter((p) => {
-    // If local product has explicit period, use it directly
-    if ((p as any).period) {
-      return (p as any).period === period;
-    }
+    const dbPeriod = periodMap[p.slug] || periodMap[p.name];
+    if (dbPeriod) return dbPeriod === period;
 
     const name = p.name.toLowerCase();
     const slug = p.slug.toLowerCase();
-
     switch (period) {
       case "mensual":
         return name.includes("mensual") && !slug.includes("compra-total");
@@ -70,15 +84,77 @@ export function PlansSection() {
   const [period, setPeriod] = useState<BillingPeriod>("mensual");
   const [page, setPage] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [dbPlans, setDbPlans] = useState<DbPlan[]>([]);
   const { products, loading, error, refetch } = useProducts("per_page=50");
 
   useEffect(() => {
     setPage(0);
   }, [activeTab, period]);
 
+  useEffect(() => {
+    fetch("/api/admin/plans")
+      .then((r) => r.json())
+      .then((data) => setDbPlans(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  function parseFeaturesFromDb(raw: unknown): string[] {
+    if (Array.isArray(raw)) return raw.filter((f): f is string => typeof f === "string")
+    if (typeof raw === "string") try { return JSON.parse(raw) } catch { return [] }
+    return []
+  }
+
+  function detectPeriodFromProduct(product: StoreProduct): string | null {
+    const slug = product.slug.toLowerCase()
+    if (slug.includes("compra-total")) return "compra-total"
+    if (slug.includes("anual") || slug.includes("year")) return "anual"
+    if (slug.includes("mensual") || slug.includes("month")) return "mensual"
+    const name = product.name.toLowerCase()
+    if (name.includes("compra total") || name.includes("pago único")) return "compra-total"
+    if (name.includes("anual")) return "anual"
+    if (name.includes("mensual")) return "mensual"
+    return null
+  }
+
+  function findDbPlan(product: StoreProduct): DbPlan | undefined {
+    const detectedPeriod = detectPeriodFromProduct(product)
+
+    const exact = dbPlans.find(
+      (p) => p.slug === product.slug && (!detectedPeriod || p.period === detectedPeriod)
+    )
+    if (exact) return { ...exact, features: parseFeaturesFromDb(exact.features) }
+
+    const slugContains = dbPlans.find(
+      (p) =>
+        (product.slug.includes(p.slug) || p.slug.includes(product.slug)) &&
+        (!detectedPeriod || p.period === detectedPeriod)
+    )
+    if (slugContains) return { ...slugContains, features: parseFeaturesFromDb(slugContains.features) }
+
+    const sameName = dbPlans.find(
+      (p) =>
+        p.name.toLowerCase() === product.name.toLowerCase().replace(/^EXA\s*/i, "").trim() &&
+        (!detectedPeriod || p.period === detectedPeriod)
+    )
+    if (sameName) return { ...sameName, features: parseFeaturesFromDb(sameName.features) }
+
+    const anyName = dbPlans.find(
+      (p) => p.slug === product.slug || p.name === product.name
+    )
+    if (anyName) return { ...anyName, features: parseFeaturesFromDb(anyName.features) }
+
+    return undefined
+  }
+
+  const periodMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    dbPlans.forEach((p) => { map[p.slug] = p.period; map[p.name] = p.period; });
+    return map;
+  }, [dbPlans]);
+
   const filtered = (() => {
     if (activeTab === "sistema") {
-      return filterByPeriod(products, period)
+      return filterByPeriod(products, period, periodMap)
         .filter((p) => p.categories[0]?.slug === "sistema-contable");
     }
     if (activeTab === "facturacion") {
@@ -127,10 +203,11 @@ export function PlansSection() {
   }, [totalPages]);
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="planes" className="scroll-mt-20 pt-40 pb-36 relative overflow-hidden bg-background">
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -145,7 +222,7 @@ export function PlansSection() {
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Adquiere uno de nuestros planes y descubre cómo EXA puede ayudarte a mejorar la gestión financiera de tu empresa.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="mt-12 flex flex-col items-center gap-6">
           {/* Pestañas Principales */}
@@ -187,18 +264,18 @@ export function PlansSection() {
 
           {/* Selector de Periodo */}
           {activeTab === "sistema" && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex justify-center"
             >
               <PlanToggle value={period} onChange={setPeriod} />
-            </motion.div>
+            </m.div>
           )}
         </div>
 
         {error && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-12 flex flex-col items-center gap-4 rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center"
@@ -212,7 +289,7 @@ export function PlansSection() {
               <RefreshCw className="h-4 w-4" />
               Reintentar
             </Button>
-          </motion.div>
+          </m.div>
         )}
 
         {loading && (
@@ -226,7 +303,7 @@ export function PlansSection() {
         {!loading && !error && (
           <>
             {Object.keys(grouped).length === 0 ? (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="mt-16 text-center"
@@ -237,7 +314,7 @@ export function PlansSection() {
                   </p>
                 </div>
                 <CustomPlanBuilder />
-              </motion.div>
+              </m.div>
             ) : (
               categoryOrder.map(
                 (cat) =>
@@ -256,7 +333,7 @@ export function PlansSection() {
                         {currentPlans.length > 0 && (
                           <div className="relative">
                             <AnimatePresence mode="wait" custom={direction}>
-                              <motion.div
+                              <m.div
                                 key={clampedPage}
                                 custom={direction}
                                 variants={slideVariants}
@@ -266,10 +343,13 @@ export function PlansSection() {
                                 transition={{ duration: 0.3, ease: "easeInOut" }}
                               >
                                   <PlanCard
-                                    product={currentPlans[clampedPage]}
-                                    index={clampedPage}
-                                  />
-                              </motion.div>
+                                product={currentPlans[clampedPage]}
+                                index={clampedPage}
+                                features={findDbPlan(currentPlans[clampedPage])?.features}
+                                description={findDbPlan(currentPlans[clampedPage])?.description}
+                                period={findDbPlan(currentPlans[clampedPage])?.period}
+                              />
+                              </m.div>
                             </AnimatePresence>
 
                             {totalPages > 1 && (
@@ -317,6 +397,9 @@ export function PlansSection() {
                             key={product.id}
                             product={product}
                             index={index}
+                            features={findDbPlan(product)?.features}
+                            description={findDbPlan(product)?.description}
+                            period={findDbPlan(product)?.period}
                           />
                         ))}
                       </div>
@@ -329,5 +412,6 @@ export function PlansSection() {
         )}
       </div>
     </section>
+    </LazyMotion>
   );
 }

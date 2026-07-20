@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendInquiryEmail } from "@/lib/email";
 
+async function generateOrderNumber(): Promise<number> {
+  const lastOrder = await prisma.order.findFirst({
+    orderBy: { orderNumber: "desc" },
+    select: { orderNumber: true },
+  });
+  return (lastOrder?.orderNumber ?? 0) + 1;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -14,9 +22,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Save as local order with status "cotizacion"
+    const orderNumber = await generateOrderNumber();
+
     const order = await prisma.order.create({
       data: {
+        orderNumber,
         customerName: name,
         customerEmail: email,
         customerPhone: phone,

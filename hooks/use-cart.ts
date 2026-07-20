@@ -7,9 +7,9 @@ import {
   addToCart as storeAddToCart,
   removeCartItem as storeRemoveItem,
   updateCartItem as storeUpdateItem,
-} from "@/lib/woocommerce-store";
+} from "@/lib/store";
 
-const CART_TOKEN_KEY = "wc_cart_token";
+const CART_TOKEN_KEY = "exa_cart_token";
 
 function getStoredToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -41,7 +41,7 @@ export function useCart() {
     }
     try {
       useCartStore.getState().setLoading(true);
-      const { cart, nonce } = await getCart(token);
+      const { cart, nonce } = await getCart();
       useCartStore.getState().setCart(cart, token, nonce);
     } catch {
       setStoredToken(null);
@@ -63,9 +63,7 @@ export function useCart() {
     async (productId: string | number, quantity: number = 1) => {
       try {
         useCartStore.getState().setLoading(true);
-        const token = getStoredToken();
-        const currentNonce = useCartStore.getState().nonce;
-        const { cart, cartToken, nonce: newNonce } = await storeAddToCart(productId, quantity, token || undefined, currentNonce || undefined);
+        const { cart, cartToken, nonce: newNonce } = await storeAddToCart(productId, quantity);
         setStoredToken(cartToken || null);
         useCartStore.getState().setCart(cart, cartToken, newNonce || null);
         useCartStore.getState().setOpen(true);
@@ -83,9 +81,8 @@ export function useCart() {
     async (itemKey: string) => {
       try {
         useCartStore.getState().setLoading(true);
-        const token = getStoredToken();
-        const cart = await storeRemoveItem(itemKey, token || undefined);
-        useCartStore.getState().setCart(cart, token);
+        const cart = await storeRemoveItem(itemKey);
+        useCartStore.getState().setCart(cart, getStoredToken());
       } catch (err) {
         console.error("Error removing item:", err);
       } finally {
@@ -99,9 +96,8 @@ export function useCart() {
     async (itemKey: string, quantity: number) => {
       try {
         useCartStore.getState().setLoading(true);
-        const token = getStoredToken();
-        const cart = await storeUpdateItem(itemKey, quantity, token || undefined);
-        useCartStore.getState().setCart(cart, token);
+        const cart = await storeUpdateItem(itemKey, quantity);
+        useCartStore.getState().setCart(cart, getStoredToken());
       } catch (err) {
         console.error("Error updating item:", err);
       } finally {

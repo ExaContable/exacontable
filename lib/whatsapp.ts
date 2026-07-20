@@ -17,6 +17,7 @@ async function getToPhone(): Promise<string> {
 
 interface OrderNotification {
   order_id: string | number;
+  order_number?: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -37,7 +38,7 @@ function formatMessage(data: OrderNotification): string {
   return [
     "🛒 *NUEVA ORDEN - EXA CONTABLE*",
     "",
-    `📋 *Orden #${data.order_id}*`,
+    `📋 *Orden ${data.order_number || `#${data.order_id}`}*`,
     `👤 *Cliente:* ${data.customer_name}`,
     `📧 *Email:* ${data.customer_email}`,
     `📞 *Teléfono:* ${data.customer_phone}`,
@@ -72,7 +73,7 @@ export async function sendOrderNotification(data: OrderNotification) {
 
   try {
     await sendWhatsAppMessage(TO_PHONE, formatMessage(data));
-    console.log("WhatsApp notification sent for order #" + data.order_id);
+    console.log("WhatsApp notification sent for order " + (data.order_number || "#" + data.order_id));
   } catch (error) {
     console.error("WhatsApp notification failed:", error);
   }
@@ -80,6 +81,7 @@ export async function sendOrderNotification(data: OrderNotification) {
 
 export async function sendReceiptNotification(data: {
   order_id: string | number;
+  order_number?: string;
   customer_name: string;
   customer_email: string;
 }) {
@@ -92,7 +94,7 @@ export async function sendReceiptNotification(data: {
   const message = [
     "📎 *COMPROBANTE SUBIDO - EXA CONTABLE*",
     "",
-    `📋 *Orden #${data.order_id}*`,
+    `📋 *Orden ${data.order_number || `#${data.order_id}`}*`,
     `👤 *Cliente:* ${data.customer_name}`,
     `📧 *Email:* ${data.customer_email}`,
     "",
@@ -104,7 +106,7 @@ export async function sendReceiptNotification(data: {
 
   try {
     await sendWhatsAppMessage(TO_PHONE, message);
-    console.log("WhatsApp receipt notification sent for order #" + data.order_id);
+    console.log("WhatsApp receipt notification sent for order " + (data.order_number || "#" + data.order_id));
   } catch (error) {
     console.error("WhatsApp receipt notification failed:", error);
   }

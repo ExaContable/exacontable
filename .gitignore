@@ -29,6 +29,9 @@ dev.db
 *.db
 *.db-journal
 
+# sensitive files
+hash.txt
+
 # uploads
 public/uploads/
 

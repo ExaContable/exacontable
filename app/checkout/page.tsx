@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/use-cart";
 import { validarRucOCedula } from "@/lib/validators";
@@ -107,7 +107,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartToken } = useCart();
   const [loading, setLoading] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState<{ id: string; title: string; description: string; accounts?: { account_name: string; account_number: string; bank_name: string }[] }[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<{ id: string; title: string; description: string; accounts?: { account_name: string; account_number: string; bank_name: string; account_ruc: string }[] }[]>([]);
   const [loadingGateways, setLoadingGateways] = useState(true);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
 
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     async function loadPaymentMethods() {
       try {
-        const res = await fetch("/api/woocommerce/payment-methods");
+        const res = await fetch("/api/payment-methods");
         if (res.ok) {
           const data = await res.json();
           setPaymentMethods(data);
@@ -214,13 +214,10 @@ export default function CheckoutPage() {
         meta_data: metaData,
       };
 
-      const res = await fetch("/api/woocommerce/checkout", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          checkoutData: checkoutPayload,
-          cartToken,
-        }),
+        body: JSON.stringify({ checkoutData: checkoutPayload }),
       });
 
       if (!res.ok) {
@@ -235,7 +232,7 @@ export default function CheckoutPage() {
         router.push(`/mis-pedidos/${result.order_id}`);
       } else {
         toast.success("Pedido creado exitosamente");
-        router.push(`/gracias?order_id=${result.order_id}`);
+        router.push(`/gracias?order_id=${result.order_id}&order_number=${result.order_number}`);
       }
     } catch (err) {
       toast.error(
@@ -249,6 +246,7 @@ export default function CheckoutPage() {
   const docConfig = { showRuc: true, showCedula: true };
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="min-h-screen bg-zinc-50/50">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
         {/* Header */}
@@ -287,7 +285,7 @@ export default function CheckoutPage() {
                   </button>
                   <AnimatePresence>
                     {showOrderSummary && (
-                      <motion.div
+                      <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -313,7 +311,7 @@ export default function CheckoutPage() {
                             </span>
                           </div>
                         </div>
-                      </motion.div>
+                      </m.div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -609,13 +607,13 @@ export default function CheckoutPage() {
                               )}
                             </div>
                             {isSelected && (
-                              <motion.div
+                              <m.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white"
                               >
                                 <Check className="h-3.5 w-3.5 stroke-[3]" />
-                              </motion.div>
+                              </m.div>
                             )}
                           </label>
                         );
@@ -624,7 +622,7 @@ export default function CheckoutPage() {
                   </div>
 
                   {hasAccounts && selectedMethod && (
-                    <motion.div
+                    <m.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="space-y-4 rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 sm:p-5"
@@ -642,7 +640,7 @@ export default function CheckoutPage() {
                       <div className="space-y-2.5">
                         {selectedMethod.accounts!.map((account, i) => (
                           <div key={i} className="rounded-lg border border-zinc-200 bg-white p-3.5 space-y-2">
-                            <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                               <div>
                                 <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Banco</span>
                                 <p className="font-semibold text-zinc-900">{account.bank_name}</p>
@@ -651,10 +649,16 @@ export default function CheckoutPage() {
                                 <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">Titular</span>
                                 <p className="font-semibold text-zinc-900">{account.account_name}</p>
                               </div>
-                              <div className="col-span-2">
+                              <div>
                                 <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">N° Cuenta</span>
-                                <p className="font-mono font-bold text-zinc-900 text-base tracking-wider">{account.account_number}</p>
+                                <p className="font-mono font-bold text-zinc-900 tracking-wider">{account.account_number}</p>
                               </div>
+                              {account.account_ruc && (
+                                <div>
+                                  <span className="text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">RUC/Cédula</span>
+                                  <p className="font-mono font-bold text-zinc-900 tracking-wider">{account.account_ruc}</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -666,7 +670,7 @@ export default function CheckoutPage() {
                           Luego de realizar la transferencia, podrás subir tu comprobante de pago desde la página de confirmación del pedido.
                         </p>
                       </div>
-                    </motion.div>
+                    </m.div>
                   )}
 
                   <FormField
@@ -702,7 +706,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full rounded-xl h-12 text-base font-bold bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white shadow-lg shadow-red-500/20"
+                  className="w-full rounded-xl h-12 text-base font-bold bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20"
                   disabled={loading}
                 >
                   {loading
@@ -759,5 +763,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </LazyMotion>
   );
 }

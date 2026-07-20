@@ -57,6 +57,7 @@ export async function PUT(
       try {
         await sendOrderStatusEmail({
           id: order.id,
+          orderNumber: order.orderNumber,
           customerName: order.customerName,
           customerEmail: order.customerEmail,
           planName: order.planName,

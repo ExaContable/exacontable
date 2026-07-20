@@ -10,7 +10,15 @@ export default async function OrderDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const orderRaw = await prisma.order.findUnique({ where: { id } })
+
+  const orderRaw = await prisma.order.findFirst({
+    where: {
+      OR: [
+        { id },
+        ...(isNaN(Number(id)) ? [] : [{ orderNumber: Number(id) }]),
+      ],
+    },
+  })
 
   if (!orderRaw) notFound()
 

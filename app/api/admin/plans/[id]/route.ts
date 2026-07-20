@@ -14,7 +14,10 @@ export async function GET(
         { status: 404 }
       )
     }
-    return NextResponse.json(plan)
+    return NextResponse.json({
+      ...plan,
+      features: JSON.parse(plan.features),
+    })
   } catch (error) {
     console.error("Error fetching plan:", error)
     return NextResponse.json(
@@ -69,7 +72,10 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(plan)
+    return NextResponse.json({
+      ...plan,
+      features: JSON.parse(plan.features),
+    })
   } catch (error) {
     console.error("Error updating plan:", error)
     return NextResponse.json(

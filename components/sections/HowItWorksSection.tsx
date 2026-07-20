@@ -1,7 +1,7 @@
 "use client";
 
 import { UserCheck, Upload, Play, TrendingUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { useState, useCallback } from "react";
 
 const steps = [
@@ -70,9 +70,10 @@ export function HowItWorksSection() {
   const step = steps[page];
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="funcionamiento" className="scroll-mt-20 relative py-24 overflow-hidden bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -87,13 +88,13 @@ export function HowItWorksSection() {
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Configura tu sistema contable en menos de una hora y empieza a facturar electrónicamente el mismo día.
           </p>
-        </motion.div>
+        </m.div>
 
         {/* Mobile carousel */}
         <div className="sm:hidden mt-16">
           <div className="relative">
             <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
+              <m.div
                 key={page}
                 custom={direction}
                 variants={slideVariants}
@@ -112,7 +113,7 @@ export function HowItWorksSection() {
                 <p className="text-sm leading-relaxed text-muted-foreground max-w-xs mx-auto">
                   {step.description}
                 </p>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
 
             <button
@@ -148,7 +149,7 @@ export function HowItWorksSection() {
         </div>
 
         {/* Desktop grid */}
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -156,7 +157,7 @@ export function HowItWorksSection() {
           className="hidden sm:grid relative mt-16 gap-8 sm:grid-cols-2 lg:grid-cols-4"
         >
           {steps.map((step, i) => (
-            <motion.div
+            <m.div
               key={step.title}
               variants={itemVariants}
               className="relative text-center"
@@ -175,10 +176,11 @@ export function HowItWorksSection() {
               <p className="text-sm leading-relaxed text-muted-foreground max-w-xs mx-auto">
                 {step.description}
               </p>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

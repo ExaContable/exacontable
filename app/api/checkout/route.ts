@@ -4,48 +4,44 @@ import { prisma } from "@/lib/prisma";
 import { sendOrderNotification } from "@/lib/whatsapp";
 import { sendOrderEmail } from "@/lib/email";
 
+async function generateOrderNumber(): Promise<number> {
+  const lastOrder = await prisma.order.findFirst({
+    orderBy: { orderNumber: "desc" },
+    select: { orderNumber: true },
+  });
+  return (lastOrder?.orderNumber ?? 0) + 1;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { checkoutData } = body;
 
     if (!checkoutData) {
-      return NextResponse.json(
-        { error: "Datos de checkout requeridos" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Datos de checkout requeridos" }, { status: 400 });
     }
 
     const { billing, meta_data, payment_method } = checkoutData;
 
-    // Read local cart cookie
     const cookieStore = await cookies();
     const cartCookie = cookieStore.get("exa_cart")?.value;
     const cartItemsRaw = cartCookie ? JSON.parse(cartCookie) : [];
 
     if (cartItemsRaw.length === 0) {
-      return NextResponse.json(
-        { error: "El carrito está vacío" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
     }
 
-    // Get product details from local DB
     const firstCartItem = cartItemsRaw[0];
     const plan = await prisma.plan.findUnique({
       where: { id: String(firstCartItem.id) },
     });
 
     if (!plan) {
-      return NextResponse.json(
-        { error: "El plan seleccionado no existe en el catálogo" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "El plan seleccionado no existe en el catálogo" }, { status: 400 });
     }
 
     const total = plan.price * firstCartItem.quantity;
 
-    // Parse metadata
     const metaMap = (meta_data as { key: string; value: string }[] || []).reduce(
       (acc: Record<string, string>, m: { key: string; value: string }) => {
         acc[m.key] = m.value;
@@ -61,28 +57,24 @@ export async function POST(request: Request) {
     const genero = metaMap.billing_genero || null;
 
     const paymentMethodName = payment_method === "bacs" ? "Transferencia Bancaria" : "Payphone";
+    const orderNumber = await generateOrderNumber();
+    const orderNumberFormatted = `EXA-${String(orderNumber).padStart(4, "0")}`;
 
-    // Create Order locally
     const order = await prisma.order.create({
       data: {
+        orderNumber,
         customerName: `${billing.first_name} ${billing.last_name}`.trim(),
         customerEmail: billing.email,
         customerPhone: billing.phone || "",
         planId: plan.id,
         planName: plan.name,
         total: total,
-        status: "on-hold", // "on-hold" is standard for pending payment bank transfer
+        status: "on-hold",
         paymentMethod: paymentMethodName,
         paymentStatus: "pending",
         receiptUrl: null,
         notes: "",
-        
-        // Save the new details fields
-        ruc,
-        cedula,
-        usuario,
-        clave,
-        genero,
+        ruc, cedula, usuario, clave, genero,
         address: billing.address_1,
         city: billing.city,
         state: billing.state,
@@ -90,13 +82,12 @@ export async function POST(request: Request) {
       },
     });
 
-    // Clear local cart cookie
     cookieStore.delete("exa_cart");
 
-    // Send WhatsApp notification to Admin/Support
     try {
       await sendOrderNotification({
         order_id: order.id,
+        order_number: orderNumberFormatted,
         customer_name: `${billing.first_name} ${billing.last_name}`,
         customer_email: billing.email,
         customer_phone: billing.phone || "",
@@ -118,10 +109,10 @@ export async function POST(request: Request) {
       console.error("Failed to send WhatsApp notification:", waErr);
     }
 
-    // Send Email notification to User and Admin copy
     try {
       await sendOrderEmail({
         id: order.id,
+        orderNumber: order.orderNumber,
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         planName: order.planName,
@@ -137,18 +128,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       order_id: order.id,
+      order_number: orderNumberFormatted,
       order_key: `key_${order.id.slice(0, 8)}`,
       payment_url: `/mis-pedidos/${order.id}`,
     });
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Error al procesar el checkout",
-      },
+      { error: error instanceof Error ? error.message : "Error al procesar el checkout" },
       { status: 500 }
     );
   }

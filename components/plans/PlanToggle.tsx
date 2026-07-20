@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,7 +18,8 @@ interface PlanToggleProps {
 
 export function PlanToggle({ value, onChange }: PlanToggleProps) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-card p-1.5 shadow-3">
+    <LazyMotion features={domAnimation}>
+      <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-card p-1.5 shadow-3">
       {periods.map((period) => (
         <button
           key={period.value}
@@ -31,7 +32,7 @@ export function PlanToggle({ value, onChange }: PlanToggleProps) {
           )}
         >
           {value === period.value && (
-            <motion.span
+            <m.span
               layoutId="activeTab"
               className="absolute inset-0 rounded-md bg-primary shadow-1"
               transition={{ type: "spring", duration: 0.4 }}
@@ -55,5 +56,6 @@ export function PlanToggle({ value, onChange }: PlanToggleProps) {
         </button>
       ))}
     </div>
+    </LazyMotion>
   );
 }

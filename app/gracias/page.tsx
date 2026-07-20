@@ -7,11 +7,12 @@ import { CheckCircle, ArrowLeft, MessageCircle, FileText, Mail } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart-store";
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 
 function GraciasContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
+  const orderNumber = searchParams.get("order_number") || orderId;
   const setCart = useCartStore((s) => s.setCart);
   const setCartToken = useCartStore((s) => s.setCartToken);
 
@@ -22,26 +23,27 @@ function GraciasContent() {
   }, [setCart, setCartToken]);
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="relative min-h-[80vh] flex flex-col items-center justify-center px-4 py-28 overflow-hidden bg-gradient-to-b from-zinc-50 to-white">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[400px] bg-red-500/5 rounded-full blur-[120px] -z-10" />
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative mx-auto w-full max-w-xl"
       >
         <div className="rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-6 sm:p-10 text-center shadow-[0_24px_80px_-15px_rgba(0,0,0,0.08)] transition-all duration-300">
-          <motion.div
+          <m.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
           >
             <CheckCircle className="h-8 w-8 text-emerald-600" />
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -52,12 +54,12 @@ function GraciasContent() {
 
             <p className="mt-3 text-sm sm:text-base text-zinc-500">
               Tu pedido{" "}
-              <span className="font-extrabold text-zinc-900 font-heading">#{orderId}</span>{" "}
+              <span className="font-extrabold text-zinc-900 font-heading">#{orderNumber}</span>{" "}
               ha sido creado exitosamente en nuestra plataforma.
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -100,9 +102,9 @@ function GraciasContent() {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -126,15 +128,16 @@ function GraciasContent() {
               </Button>
             </a>
             <Link href="/#planes" className="w-full sm:w-auto">
-              <Button className="w-full gap-2 font-bold bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white rounded-xl shadow-lg shadow-red-500/20">
+              <Button className="w-full gap-2 font-bold bg-red-600 hover:bg-red-500 text-white rounded-xl shadow-lg shadow-red-500/20">
                 <ArrowLeft className="h-4 w-4" />
                 Volver al inicio
               </Button>
             </Link>
-          </motion.div>
+          </m.div>
         </div>
-      </motion.div>
+      </m.div>
     </div>
+    </LazyMotion>
   );
 }
 

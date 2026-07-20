@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Sidebar } from "@/components/admin/Sidebar"
 import { DashboardHeader } from "@/components/admin/DashboardHeader"
 import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 const titles: Record<string, string> = {
   "/admin": "Dashboard",
@@ -20,15 +21,14 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const pathname = usePathname()
-
-  useEffect(() => {
-    const saved = localStorage.getItem("admin_sidebar_collapsed")
-    if (saved === "true") {
-      setSidebarCollapsed(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin_sidebar_collapsed")
+      return saved === "true"
     }
-  }, [])
+    return false
+  })
+  const pathname = usePathname()
 
   function handleToggleCollapse() {
     setSidebarCollapsed((prev) => {
@@ -47,7 +47,7 @@ export default function AdminLayout({
   )?.[1] || "Dashboard"
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
+    <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar
         open={sidebarOpen}
         collapsed={sidebarCollapsed}
@@ -60,14 +60,10 @@ export default function AdminLayout({
       )}>
         <DashboardHeader
           title={title}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={handleToggleCollapse}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 p-4 lg:p-6 bg-zinc-50">{children}</main>
+        <main className="flex-1 p-5 lg:p-7">{children}</main>
       </div>
     </div>
   )
 }
-
-import { cn } from "@/lib/utils"

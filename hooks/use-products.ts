@@ -12,7 +12,7 @@ export function useProducts(params?: string) {
     try {
       setLoading(true);
       setError(null);
-      const url = `/api/woocommerce/products${params ? `?${params}` : ""}`;
+      const url = `/api/products${params ? `?${params}` : ""}`;
       const res = await fetch(url);
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -34,7 +34,7 @@ export function useProducts(params?: string) {
       try {
         setLoading(true);
         setError(null);
-        const url = `/api/woocommerce/products${params ? `?${params}` : ""}`;
+        const url = `/api/products${params ? `?${params}` : ""}`;
         const res = await fetch(url);
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -67,7 +67,7 @@ export function useProduct(id: number | null) {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/woocommerce/products?id=${id}`);
+        const res = await fetch(`/api/products?id=${id}`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         setProduct(data);

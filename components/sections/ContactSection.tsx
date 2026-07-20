@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -93,13 +93,14 @@ export function ContactSection() {
   };
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="contacto" className="scroll-mt-20 bg-background py-24 relative overflow-hidden">
       <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/3 blur-3xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -114,19 +115,19 @@ export function ContactSection() {
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Rellena el formulario y un asesor de EXA te atenderá personalmente.
           </p>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           className="mt-16 grid gap-12 lg:grid-cols-5"
         >
-          <motion.div variants={itemVariants} className="lg:col-span-3">
+          <m.div variants={itemVariants} className="lg:col-span-3">
             <AnimatePresence mode="wait">
               {success ? (
-                <motion.div
+                <m.div
                   key="success"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -134,14 +135,14 @@ export function ContactSection() {
                   transition={{ type: "spring", stiffness: 200, damping: 20 }}
                   className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-card p-12 text-center shadow-sm"
                 >
-                  <motion.div
+                  <m.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                     className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10"
                   >
                     <CheckCircle2 className="h-10 w-10 text-primary" />
-                  </motion.div>
+                  </m.div>
                   <h3 className="text-xl font-semibold text-foreground">
                     ¡Mensaje enviado con éxito!
                   </h3>
@@ -156,9 +157,9 @@ export function ContactSection() {
                   >
                     Enviar otro mensaje
                   </Button>
-                </motion.div>
+                </m.div>
               ) : (
-                <motion.div
+                <m.div
                   key="form"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -279,12 +280,12 @@ export function ContactSection() {
                       </form>
                     </Form>
                   </div>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
 
-          <motion.div variants={itemVariants} className="lg:col-span-2 space-y-5">
+          <m.div variants={itemVariants} className="lg:col-span-2 space-y-5">
             <h3 className="text-xl font-semibold text-foreground font-heading">
               Información de contacto
             </h3>
@@ -358,9 +359,10 @@ export function ContactSection() {
                 ))}
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

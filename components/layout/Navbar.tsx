@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Menu, X, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -77,7 +77,8 @@ export function Navbar() {
   }, [mobileOpen]);
 
   return (
-    <motion.header
+    <LazyMotion features={domAnimation}>
+    <m.header
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -96,7 +97,7 @@ export function Navbar() {
             : "h-16 px-4 sm:px-6 lg:px-8 max-w-7xl",
         )}
       >
-        <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
+        <m.div variants={itemVariants} whileHover={{ scale: 1.02 }}>
           <Link
             href="/"
             className="flex items-center gap-2"
@@ -111,15 +112,15 @@ export function Navbar() {
               priority
             />
           </Link>
-        </motion.div>
+        </m.div>
 
         <nav aria-label="Menu de navegacion" className="hidden md:block">
-          <motion.ul
+          <m.ul
             variants={containerVariants}
             className="flex items-center gap-1"
           >
             {navLinks.map((link) => (
-              <motion.li key={link.href} variants={itemVariants}>
+              <m.li key={link.href} variants={itemVariants}>
                 <Link
                   href={link.href}
                   onMouseEnter={() => setHoveredItem(link.href)}
@@ -128,7 +129,7 @@ export function Navbar() {
                   className="relative rounded-full px-4 py-2 text-sm font-bold font-heading text-red-800 transition-colors hover:text-foreground"
                 >
                   {hoveredItem === link.href && (
-                    <motion.span
+                    <m.span
                       layoutId="navbar-hover"
                       className="absolute inset-0 rounded-full bg-muted"
                       transition={{
@@ -140,10 +141,10 @@ export function Navbar() {
                   )}
                   <span className="relative z-10">{link.label}</span>
                 </Link>
-              </motion.li>
+              </m.li>
             ))}
 
-            <motion.li
+            <m.li
               variants={itemVariants}
               className="flex items-center gap-1.5 ml-2 border-l border-border pl-3"
             >
@@ -171,8 +172,8 @@ export function Navbar() {
               >
                 Portal Cliente
               </a>
-            </motion.li>
-          </motion.ul>
+            </m.li>
+          </m.ul>
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -202,7 +203,7 @@ export function Navbar() {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -219,7 +220,7 @@ export function Navbar() {
           >
             <nav className="space-y-1 px-4 py-6">
               {navLinks.map((link, i) => (
-                <motion.div
+                <m.div
                   key={link.href}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -232,7 +233,7 @@ export function Navbar() {
                   >
                     {link.label}
                   </Link>
-                </motion.div>
+                </m.div>
               ))}
               <div className="flex items-center justify-center gap-4 pt-6 border-t border-border mt-4">
                 <a
@@ -255,9 +256,10 @@ export function Navbar() {
                 </a>
               </div>
             </nav>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </m.header>
+    </LazyMotion>
   );
 }

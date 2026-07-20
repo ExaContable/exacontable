@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 
 import { usePathname } from "next/navigation";
 
@@ -18,8 +18,9 @@ export function FloatingCart() {
   const hasItems = cart && cart.items.length > 0;
 
   return (
+    <LazyMotion features={domAnimation}>
     <AnimatePresence>
-      <motion.div
+      <m.div
         initial={{ scale: 0, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0, opacity: 0, y: 20 }}
@@ -39,7 +40,8 @@ export function FloatingCart() {
             </Badge>
           )}
         </Button>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
+    </LazyMotion>
   );
 }

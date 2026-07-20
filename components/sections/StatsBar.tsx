@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 import { Users, Clock, ShieldCheck, BarChart3 } from "lucide-react";
 
 const stats = [
@@ -12,11 +12,12 @@ const stats = [
 
 export function StatsBar() {
   return (
+    <LazyMotion features={domAnimation}>
     <section className="relative border-y border-border/40 bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-px md:grid-cols-4">
           {stats.map((stat, i) => (
-            <motion.div
+            <m.div
               key={stat.label}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -35,10 +36,11 @@ export function StatsBar() {
                   {stat.label}
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

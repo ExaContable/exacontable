@@ -30,19 +30,19 @@ export async function POST(request: Request) {
 
     const receiptUrl = `/uploads/receipts/${orderId}/${filename}`;
 
-    // Update local order
     const order = await prisma.order.update({
       where: { id: orderId },
       data: {
         receiptUrl,
-        status: "processing", // Move to processing (waiting for admin verification)
+        status: "processing",
       },
     });
 
-    // Send WhatsApp notification to Support
     try {
+      const orderNumberFormatted = `EXA-${String(order.orderNumber).padStart(4, "0")}`;
       await sendReceiptNotification({
         order_id: order.id,
+        order_number: orderNumberFormatted,
         customer_name: order.customerName,
         customer_email: order.customerEmail,
       });

@@ -5,7 +5,7 @@ import { Check, Settings, Sparkles, MessageSquare, HelpCircle, Loader2, Building
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -171,7 +171,8 @@ export function CustomPlanBuilder({ index = 0 }: CustomPlanBuilderProps) {
   };
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation}>
+    <m.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -453,6 +454,7 @@ export function CustomPlanBuilder({ index = 0 }: CustomPlanBuilderProps) {
           </DialogContent>
         </Dialog>
       </div>
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   );
 }

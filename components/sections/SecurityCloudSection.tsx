@@ -1,17 +1,18 @@
 "use client";
 
 import { Cloud, Lock, ShieldCheck, Database, RefreshCcw } from "lucide-react";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 
 export function SecurityCloudSection() {
   return (
+    <LazyMotion features={domAnimation}>
     <section
       id="seguridad"
       className="relative py-24 overflow-hidden bg-[#8B1E21]"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -66,9 +67,9 @@ export function SecurityCloudSection() {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -99,9 +100,10 @@ export function SecurityCloudSection() {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 
 const testimonials = [
@@ -119,9 +119,10 @@ export function BenefitsSection() {
   const visibleTestimonials = testimonials.slice(start, start + perPage);
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="testimonios" className="scroll-mt-20 pt-32 pb-32 relative overflow-hidden bg-[#8B1E21]">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -136,11 +137,11 @@ export function BenefitsSection() {
           <p className="mt-4 text-base sm:text-lg text-white/60 max-w-xl mx-auto leading-relaxed">
             Más de 500 empresas ecuatorianas ya confían en EXA para su gestión financiera.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="relative mt-16">
           <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
+            <m.div
               key={page}
               custom={direction}
               variants={slideVariants}
@@ -184,7 +185,7 @@ export function BenefitsSection() {
                   </div>
                 </div>
               ))}
-            </motion.div>
+            </m.div>
           </AnimatePresence>
 
           <button
@@ -219,5 +220,6 @@ export function BenefitsSection() {
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

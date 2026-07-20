@@ -24,7 +24,7 @@ model Plan {
 
 model Order {
   id            String   @id @default(cuid())
-  wooCommerceId Int?     @unique
+  orderNumber   Int      @default(0) @unique
   customerName  String
   customerEmail String
   customerPhone String?
@@ -36,7 +36,7 @@ model Order {
   paymentStatus String   @default("pending")
   receiptUrl    String?
   notes         String?
-  
+
   // Custom billing and user credentials
   ruc           String?
   cedula        String?

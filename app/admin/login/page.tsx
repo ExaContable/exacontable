@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,13 +33,23 @@ const itemVariants = {
 export default function LoginPage() {
   const router = useRouter()
   const emailRef = useRef<HTMLInputElement>(null)
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("admin_login_email") || ""
+    }
+    return ""
+  })
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
-  const [rememberEmail, setRememberEmail] = useState(false)
+  const [rememberEmail, setRememberEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("admin_login_email")
+    }
+    return false
+  })
   const [emailError, setEmailError] = useState("")
 
   useEffect(() => {
@@ -58,14 +68,6 @@ export default function LoginPage() {
     }
     checkSession()
   }, [router])
-
-  useEffect(() => {
-    const saved = localStorage.getItem("admin_login_email")
-    if (saved) {
-      setEmail(saved)
-      setRememberEmail(true)
-    }
-  }, [])
 
   useEffect(() => {
     if (!checkingSession) {
@@ -149,14 +151,15 @@ export default function LoginPage() {
   }
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-red-50 via-white to-zinc-50 p-4">
-      <motion.div
+      <m.div
         className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-100/60 via-transparent to-transparent"
         animate={{ opacity: [0.4, 0.8, 0.4] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      <motion.div
+      <m.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -164,7 +167,7 @@ export default function LoginPage() {
       >
         <Card className="border-zinc-200/80 bg-white/90 backdrop-blur-2xl shadow-xl shadow-red-900/5">
           <CardHeader className="items-center space-y-5 pb-6 text-center pt-8">
-            <motion.div
+            <m.div
               custom={0}
               variants={itemVariants}
               initial="hidden"
@@ -179,8 +182,8 @@ export default function LoginPage() {
                 className="h-14 w-auto mx-auto"
                 priority
               />
-            </motion.div>
-            <motion.div
+            </m.div>
+            <m.div
               custom={1}
               variants={itemVariants}
               initial="hidden"
@@ -192,13 +195,13 @@ export default function LoginPage() {
               <CardDescription className="text-zinc-500 mt-1.5">
                 Ingresa tus credenciales para acceder
               </CardDescription>
-            </motion.div>
+            </m.div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               <AnimatePresence>
                 {error && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -207,11 +210,11 @@ export default function LoginPage() {
                   >
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 self-start" />
                     <span>{error}</span>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
 
-              <motion.div
+              <m.div
                 custom={2}
                 variants={itemVariants}
                 initial="hidden"
@@ -247,9 +250,9 @@ export default function LoginPage() {
                 {emailError && (
                   <p className="text-xs text-red-500 mt-1">{emailError}</p>
                 )}
-              </motion.div>
+              </m.div>
 
-              <motion.div
+              <m.div
                 custom={3}
                 variants={itemVariants}
                 initial="hidden"
@@ -288,9 +291,9 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-              </motion.div>
+              </m.div>
 
-              <motion.div
+              <m.div
                 custom={4}
                 variants={itemVariants}
                 initial="hidden"
@@ -322,9 +325,9 @@ export default function LoginPage() {
                     Recordar correo
                   </span>
                 </label>
-              </motion.div>
+              </m.div>
 
-              <motion.div
+              <m.div
                 custom={5}
                 variants={itemVariants}
                 initial="hidden"
@@ -356,19 +359,20 @@ export default function LoginPage() {
                     </span>
                   )}
                 </Button>
-              </motion.div>
+              </m.div>
             </form>
           </CardContent>
         </Card>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.5 } }}
           className="mt-6 text-center text-xs text-zinc-400"
         >
           &copy; {new Date().getFullYear()} EXA Contable &mdash; Todos los derechos reservados
-        </motion.p>
-      </motion.div>
+        </m.p>
+      </m.div>
     </div>
+    </LazyMotion>
   )
 }

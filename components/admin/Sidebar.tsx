@@ -17,7 +17,6 @@ import {
   PanelLeft,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { motion } from "framer-motion"
 
 const menuItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -48,29 +47,30 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
     <>
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-zinc-200/80 transition-all duration-300 overflow-hidden",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 overflow-hidden",
           collapsed ? "w-16" : "w-64",
           open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
+        {/* Header */}
         <div className={cn(
-          "flex h-16 items-center border-b border-zinc-200/80",
+          "flex h-14 items-center border-b border-sidebar-border shrink-0",
           collapsed ? "justify-center px-0" : "justify-between px-5"
         )}>
           {collapsed ? (
             <button
               onClick={onToggleCollapse}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground/50 hover:text-heading hover:bg-accent/50 transition-all"
               title="Expandir menú"
             >
-              <PanelLeft className="h-5 w-5" />
+              <PanelLeft className="h-4 w-4" />
             </button>
           ) : (
             <>
@@ -80,30 +80,29 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
                   alt="EXA Contable"
                   width={120}
                   height={36}
-                  className="h-8 w-auto"
+                  className="h-7 w-auto"
                 />
               </Link>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={onToggleCollapse}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all hidden lg:flex"
-                  title="Colapsar menú"
-                >
-                  <PanelLeftClose className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={onClose}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all lg:hidden"
-                  title="Cerrar menú"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+              <button
+                onClick={onToggleCollapse}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/40 hover:text-heading hover:bg-accent/50 transition-all hidden lg:flex"
+                title="Colapsar menú"
+              >
+                <PanelLeftClose className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={onClose}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/40 hover:text-heading hover:bg-accent/50 transition-all lg:hidden"
+                title="Cerrar menú"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </>
           )}
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto p-2 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-300 [&::-webkit-scrollbar-track]:bg-transparent">
+        {/* Navigation */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto p-2 min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
           {menuItems.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -115,47 +114,44 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
                   "flex items-center rounded-lg transition-all duration-200 group",
                   collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
                   isActive
-                    ? "bg-red-50 text-red-600 font-bold"
-                    : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
+                    ? "bg-primary/8 text-primary font-semibold"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-heading"
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 <item.icon className={cn(
-                  "h-4 w-4 shrink-0",
-                  isActive ? "text-red-600" : "text-zinc-400 group-hover:text-zinc-600"
+                  "h-4 w-4 shrink-0 transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground/60 group-hover:text-heading"
                 )} />
                 {!collapsed && (
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className="text-sm">{item.label}</span>
                 )}
                 {isActive && !collapsed && (
-                  <motion.div
-                    layoutId="sidebar-active"
-                    className="ml-auto h-2 w-2 rounded-full bg-red-600"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
+                  <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
                 )}
               </Link>
             )
           })}
         </nav>
 
+        {/* Logout */}
         <div className={cn(
-          "border-t border-zinc-200/80 p-2",
+          "border-t border-sidebar-border p-2 shrink-0",
           collapsed && "flex justify-center"
         )}>
           <Button
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              "text-zinc-600 hover:text-red-600 hover:bg-red-50/50",
+              "text-muted-foreground/60 hover:text-destructive hover:bg-destructive/5",
               collapsed
-                ? "w-10 h-10 p-0 justify-center rounded-lg"
-                : "w-full justify-start gap-3"
+                ? "w-9 h-9 p-0 justify-center rounded-lg"
+                : "w-full justify-start gap-3 text-sm"
             )}
             title={collapsed ? "Cerrar Sesión" : undefined}
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            {!collapsed && <span className="text-sm">Cerrar Sesión</span>}
+            {!collapsed && <span>Cerrar Sesión</span>}
           </Button>
         </div>
       </aside>

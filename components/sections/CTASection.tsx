@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, Shield, HeadphonesIcon, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 
 export function CTASection() {
   return (
+    <LazyMotion features={domAnimation}>
     <section className="relative border-t border-white/10 bg-[#8B1E21] py-24 overflow-hidden">
 
       <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -61,8 +62,9 @@ export function CTASection() {
               Cancela cuando quieras
             </span>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

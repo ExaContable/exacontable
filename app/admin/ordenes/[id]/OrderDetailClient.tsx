@@ -14,13 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Save, Loader2 } from "lucide-react"
+import { ArrowLeft, Save, Loader2, Building2, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
 interface Order {
   id: string
-  wooCommerceId: number | null
+  orderNumber: number
   customerName: string
   customerEmail: string
   customerPhone: string | null
@@ -33,8 +33,7 @@ interface Order {
   notes: string | null
   createdAt: string
   updatedAt: string
-  
-  // Custom billing and credentials fields
+
   ruc?: string | null
   cedula?: string | null
   usuario?: string | null
@@ -71,6 +70,8 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
   const [notes, setNotes] = useState(initial.notes || "")
   const [saving, setSaving] = useState(false)
 
+  const orderIdStr = `EXA-${String(order.orderNumber).padStart(4, "0")}`
+
   async function handleSave() {
     setSaving(true)
     try {
@@ -94,7 +95,7 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Link
           href="/admin/ordenes"
           className="text-zinc-500 hover:text-zinc-900 transition-colors"
@@ -102,13 +103,14 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h2 className="text-xl font-heading font-bold text-zinc-950">
-          Orden #{order.id.slice(0, 8)}
+          Orden {orderIdStr}
         </h2>
-        {order.wooCommerceId && (
-          <Badge variant="outline" className="border-zinc-200 text-zinc-500 bg-zinc-50">
-            WC #{order.wooCommerceId}
-          </Badge>
-        )}
+        <Badge variant="outline" className="border-red-200 bg-red-50 text-red-650 font-mono text-[10px]">
+          {orderIdStr}
+        </Badge>
+        <Badge variant="outline" className="border-zinc-200 text-zinc-500 bg-zinc-50 text-[10px]">
+          ID: {order.id.slice(0, 8)}
+        </Badge>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -152,10 +154,15 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
               </p>
             </div>
             <div>
-              <Label className="text-xs text-zinc-500">
-                Método de Pago
-              </Label>
-              <p className="text-zinc-900 font-medium text-sm">{order.paymentMethod || "-"}</p>
+              <Label className="text-xs text-zinc-500">Método de Pago</Label>
+              <p className="text-zinc-900 font-medium text-sm flex items-center gap-1.5 mt-0.5">
+                {order.paymentMethod === "Transferencia Bancaria" ? (
+                  <Building2 className="h-4 w-4 text-zinc-500" />
+                ) : (
+                  <CreditCard className="h-4 w-4 text-zinc-500" />
+                )}
+                {order.paymentMethod || "-"}
+              </p>
             </div>
             {order.receiptUrl && (
               <div>
@@ -181,6 +188,7 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
                   day: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
+                  timeZone: "America/Guayaquil",
                 })}
               </p>
             </div>
@@ -188,7 +196,6 @@ export function OrderDetailClient({ order: initial }: { order: Order }) {
         </Card>
       </div>
 
-      {/* Credenciales y Facturación Card */}
       {(order.ruc || order.cedula || order.usuario || order.address) && (
         <Card className="border-zinc-200 bg-white shadow-sm shadow-zinc-100/50">
           <CardHeader>

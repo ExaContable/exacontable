@@ -1,5 +1,4 @@
 import { SignJWT, jwtVerify } from "jose"
-import bcrypt from "bcryptjs"
 import { cookies } from "next/headers"
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -7,11 +6,10 @@ const JWT_SECRET = new TextEncoder().encode(
 )
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@exacontable.com"
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || ""
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ""
 
 export async function verifyPassword(password: string): Promise<boolean> {
-  if (!ADMIN_PASSWORD_HASH) return false
-  return bcrypt.compare(password, ADMIN_PASSWORD_HASH)
+  return password === ADMIN_PASSWORD
 }
 
 export async function createSession(): Promise<string> {

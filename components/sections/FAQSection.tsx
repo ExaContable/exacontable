@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, m, domAnimation, AnimatePresence } from "framer-motion";
 import { Plus, HelpCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -76,11 +76,12 @@ export function FAQSection() {
   };
 
   return (
+    <LazyMotion features={domAnimation}>
     <section id="faq" className="scroll-mt-20 pt-40 pb-36 relative overflow-hidden bg-background">
       
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -96,7 +97,7 @@ export function FAQSection() {
           <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Resolvemos las dudas más comunes sobre EXA Sistema Contable.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-4">
           {(() => {
@@ -106,7 +107,7 @@ export function FAQSection() {
                 {col.map((faq, i) => {
                   const globalIndex = colIndex === 0 ? i : mid + i;
                   return (
-                    <motion.div
+                    <m.div
                       key={globalIndex}
                       custom={globalIndex}
                       variants={itemVariants}
@@ -127,17 +128,17 @@ export function FAQSection() {
                         <span className="text-base font-bold text-slate-900 font-heading pr-2">
                           {faq.question}
                         </span>
-                        <motion.div
+                        <m.div
                           animate={{ rotate: openIndex === globalIndex ? 45 : 0, backgroundColor: openIndex === globalIndex ? "var(--primary)" : "transparent", color: openIndex === globalIndex ? "white" : "var(--primary)" }}
                           transition={{ duration: 0.25 }}
                           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20"
                         >
                           <Plus className="h-4 w-4" />
-                        </motion.div>
+                        </m.div>
                       </button>
                       <AnimatePresence initial={false}>
                         {openIndex === globalIndex && (
-                          <motion.div
+                          <m.div
                             key={`faq-answer-${globalIndex}`}
                             id={`faq-answer-${globalIndex}`}
                             initial={{ height: 0, opacity: 0 }}
@@ -151,10 +152,10 @@ export function FAQSection() {
                                 {faq.answer}
                               </p>
                             </div>
-                          </motion.div>
+                          </m.div>
                         )}
                       </AnimatePresence>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
               </div>
@@ -162,7 +163,7 @@ export function FAQSection() {
           })()}
         </div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -181,8 +182,9 @@ export function FAQSection() {
               Contacta con nosotros
             </Button>
           </Link>
-        </motion.div>
+        </m.div>
       </div>
     </section>
+    </LazyMotion>
   );
 }

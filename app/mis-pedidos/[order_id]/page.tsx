@@ -15,8 +15,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+interface BankAccount {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  account_ruc: string;
+}
+
 interface OrderData {
   id: number;
+  order_number: string;
   status: string;
   payment_method: string;
   payment_method_title: string;
@@ -31,6 +39,7 @@ interface OrderData {
   line_items: { name: string; quantity: number; price: number }[];
   receipt_url: string | null;
   billing_fields: Record<string, string>;
+  bank_accounts: BankAccount[];
   date_paid: string | null;
 }
 
@@ -44,22 +53,7 @@ const statusConfig: Record<string, { label: string; icon: typeof Clock; color: s
   failed: { label: "Fallido", icon: XCircle, color: "text-red-500" },
 };
 
-const BANK_ACCOUNTS = [
-  {
-    bank: "Banco Pichincha",
-    titular: "EXA CONTABLE S.A.S.",
-    tipo: "Corriente",
-    numero: process.env.NEXT_PUBLIC_BANCO_PICHINCHA_CUENTA || "0000000000",
-    cedula: process.env.NEXT_PUBLIC_BANCO_PICHINCHA_CEDULA || "",
-  },
-  {
-    bank: "Banco del Pacífico",
-    titular: "EXA CONTABLE S.A.S.",
-    tipo: "Corriente",
-    numero: process.env.NEXT_PUBLIC_BANCO_PACIFICO_CUENTA || "0000000000",
-    cedula: process.env.NEXT_PUBLIC_BANCO_PACIFICO_CEDULA || "",
-  },
-];
+
 
 export default function MisPedidosPage() {
   const params = useParams();
@@ -77,7 +71,7 @@ export default function MisPedidosPage() {
 
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`/api/woocommerce/orders/${orderId}`);
+        const res = await fetch(`/api/orders/${orderId}`);
         if (!res.ok) throw new Error("Error al obtener el pedido");
         const data = await res.json();
         if (!cancelled) {
@@ -112,7 +106,7 @@ export default function MisPedidosPage() {
       formData.append("file", file);
       formData.append("order_id", orderId);
 
-      const res = await fetch("/api/woocommerce/upload", {
+      const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
@@ -122,7 +116,7 @@ export default function MisPedidosPage() {
       toast.success("Comprobante subido exitosamente");
       setUploaded(true);
       try {
-        const res = await fetch(`/api/woocommerce/orders/${orderId}`);
+        const res = await fetch(`/api/orders/${orderId}`);
         if (res.ok) {
           const data = await res.json();
           setOrder(data);
@@ -180,7 +174,7 @@ export default function MisPedidosPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-border/60">
           <div className="flex items-center gap-3">
             <Package className="h-7 w-7 text-primary" />
-            <h1 className="text-3xl font-extrabold tracking-tight font-heading">Pedido #{order.id}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight font-heading">Pedido #{order.order_number}</h1>
           </div>
           <div className="flex items-center gap-2 bg-card/60 border border-border px-4 py-2 rounded-full backdrop-blur-sm shadow-sm">
             <StatusIcon className={`h-5 w-5 ${statusInfo.color}`} />
@@ -205,6 +199,7 @@ export default function MisPedidosPage() {
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
+                      timeZone: "America/Guayaquil",
                     })}
                   </p>
                 </div>
@@ -225,19 +220,20 @@ export default function MisPedidosPage() {
                   </p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {BANK_ACCOUNTS.map((account, i) => (
-                    <div key={i} className="rounded-xl border border-border bg-card/40 backdrop-blur-sm p-5 space-y-2.5">
-                      <p className="font-bold text-primary text-base font-heading">{account.bank}</p>
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        <p><span className="font-medium text-foreground">Titular:</span> {account.titular}</p>
-                        <p><span className="font-medium text-foreground">Tipo:</span> {account.tipo}</p>
-                        <p className="text-sm font-extrabold tracking-wider text-foreground mt-1.5">{account.numero}</p>
-                        {account.cedula && <p><span className="font-medium text-foreground">Cédula/RUC:</span> {account.cedula}</p>}
+                {order.bank_accounts.length > 0 && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {order.bank_accounts.map((account, i) => (
+                      <div key={i} className="rounded-xl border border-border bg-card/40 backdrop-blur-sm p-5 space-y-2.5">
+                        <p className="font-bold text-primary text-base font-heading">{account.bank_name}</p>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><span className="font-medium text-foreground">Titular:</span> {account.account_name}</p>
+                          <p className="text-sm font-extrabold tracking-wider text-foreground mt-1.5">{account.account_number}</p>
+                          {account.account_ruc && <p><span className="font-medium text-foreground">RUC/Cédula:</span> {account.account_ruc}</p>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="border-t border-border/40 pt-6">
                   {!uploaded ? (
@@ -287,7 +283,7 @@ export default function MisPedidosPage() {
                 </Button>
               </Link>
               {uploaded && (
-                <Link href={`/gracias?order_id=${order.id}`} className="flex-1">
+                <Link href={`/gracias?order_id=${order.id}&order_number=${order.order_number}`} className="flex-1">
                   <Button className="w-full gap-2 font-bold">
                     <CheckCircle className="h-4 w-4" />
                     Ver Confirmación

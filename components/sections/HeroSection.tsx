@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { LazyMotion, m, domAnimation } from "framer-motion";
 
 const gradients = [
   "radial-gradient(ellipse 80% 60% at 0% -20%, color-mix(in oklab, var(--primary) 40%, transparent) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 0%, color-mix(in oklab, var(--primary) 25%, transparent) 0%, transparent 70%), linear-gradient(180deg, var(--background) 0%, color-mix(in oklab, var(--background) 93%, white 7%) 50%, var(--background) 100%)",
@@ -25,7 +25,7 @@ function GradientLayers() {
     <div className="absolute inset-0 -z-10">
       <div className="absolute inset-0 bg-background" />
       {gradients.map((g, i) => (
-        <motion.div
+        <m.div
           key={i}
           className="absolute inset-0"
           style={{ background: g }}
@@ -47,7 +47,7 @@ function GradientLayers() {
         />
       ))}
       {bottomGlows.map((g, i) => (
-        <motion.div
+        <m.div
           key={`glow-${i}`}
           className="absolute inset-0"
           style={{ background: g }}
@@ -119,6 +119,7 @@ function DecorativeElements() {
 
 export function HeroSection() {
   return (
+    <LazyMotion features={domAnimation}>
     <section className="relative min-h-screen overflow-hidden pt-16">
       <GradientLayers />
       <DecorativeElements />
@@ -127,7 +128,7 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col items-center justify-center px-4 pt-24 pb-16 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
-          <motion.div
+          <m.div
             custom={0}
             variants={fadeUpVariants}
             initial="hidden"
@@ -136,9 +137,9 @@ export function HeroSection() {
           >
             <span className="flex h-2 w-2 animate-pulse rounded-full bg-primary" />
             Software contable de excelente funcionamiento{" "}
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             custom={1}
             variants={fadeUpVariants}
             initial="hidden"
@@ -153,9 +154,9 @@ export function HeroSection() {
                 de tu Empresa
               </span>
             </h1>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             custom={2}
             variants={fadeUpVariants}
             initial="hidden"
@@ -165,9 +166,9 @@ export function HeroSection() {
               Facturación SRI, control de stock, compras, ventas y reportes
               financieros desde un solo lugar. 100% online, sin instalaciones.
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             custom={3}
             variants={fadeUpVariants}
             initial="hidden"
@@ -193,10 +194,10 @@ export function HeroSection() {
                 Ver funcionalidades
               </Button>
             </Link>
-          </motion.div>
+          </m.div>
         </div>
 
-        <motion.div
+        <m.div
           custom={4}
           variants={fadeUpVariants}
           initial="hidden"
@@ -204,7 +205,7 @@ export function HeroSection() {
           className="relative w-full max-w-5xl mx-auto"
         >
           <div className="absolute -inset-10 rounded-[3rem] bg-gradient-to-b from-primary/20 via-primary/5 to-transparent blur-3xl opacity-75 -z-10" />
-          <motion.div
+          <m.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             className="relative rounded-2xl border border-border bg-gradient-to-b from-card/80 to-background/50 p-2 shadow-[0_24px_80px_-15px_rgba(0,0,0,0.8)] shadow-primary/5 backdrop-blur-sm"
@@ -229,11 +230,12 @@ export function HeroSection() {
                 priority
               />
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
 
       <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t" />
     </section>
+    </LazyMotion>
   );
 }

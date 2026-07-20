@@ -1,13 +1,21 @@
-# ExaContable - Configuración para cPanel con Node.js
-# Este archivo asume que cPanel maneja el proxy reverso hacia Node.js
+# ExaContable - Configuracion para cPanel con Node.js
+# Proxy reverso de cPanel redirige trafico a Node.js en el puerto configurado
 
 # --- Seguridad ---
 
 # Deshabilitar listado de directorios
 Options -Indexes
 
+# Deshabilitar ServerSignature (oculta version de Apache)
+ServerSignature Off
+
 # Proteger archivos sensibles
-<FilesMatch "\.(env|env\.local|env\.production|json|lock|ts|tsbuildinfo|md)$">
+<FilesMatch "\.(env|env\.local|env\.production|json|lock|ts|tsx|tsbuildinfo|md|db|db-journal|db-wal|db-shm)$">
+  Require all denied
+</FilesMatch>
+
+# Bloquear acceso a archivos de prisma
+<FilesMatch "prisma\.config\.ts$">
   Require all denied
 </FilesMatch>
 
@@ -22,24 +30,35 @@ Options -Indexes
   RewriteRule ^scripts/ - [F,L]
   RewriteRule ^lib/ - [F,L]
   RewriteRule ^store/ - [F,L]
+  RewriteRule ^hooks/ - [F,L]
+  RewriteRule ^types/ - [F,L]
+  RewriteRule ^skills-lock\.json$ - [F,L]
 </IfModule>
 
-# --- Cache de assets estáticos ---
+# --- Headers de seguridad adicionales ---
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# --- Cache de assets estaticos ---
 <IfModule mod_expires.c>
   ExpiresActive On
 
-  # CSS, JS, imágenes con hash - cachear por 1 año
+  # CSS, JS, imagenes con hash - cachear por 1 ano
   <FilesMatch "\.(js|css|woff2?)$">
     ExpiresDefault "access plus 1 year"
   </FilesMatch>
 
-  # Imágenes
+  # Imagenes
   <FilesMatch "\.(png|jpg|jpeg|gif|ico|svg|webp)$">
     ExpiresDefault "access plus 1 month"
   </FilesMatch>
 </IfModule>
 
-# --- Compresión ---
+# --- Compresion ---
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/json application/javascript application/x-javascript image/svg+xml
 </IfModule>
