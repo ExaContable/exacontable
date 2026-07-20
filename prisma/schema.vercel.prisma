@@ -24,7 +24,7 @@ model Plan {
 
 model Order {
   id            String   @id @default(cuid())
-  wooCommerceId Int?     @unique
+  orderNumber   Int      @default(0) @unique
   customerName  String
   customerEmail String
   customerPhone String?
