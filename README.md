@@ -1,36 +1,202 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ExaContable
 
-## Getting Started
+Plataforma web para la venta y gestion de planes de contabilidad en linea. Incluye catalogo de planes, carrito de compras, checkout, panel de administracion y integracion con WhatsApp.
 
-First, run the development server:
+## Stack Tecnologico
+
+- **Framework:** Next.js 16 (App Router, standalone output)
+- **Base de datos:** SQLite con Prisma ORM
+- **UI:** Tailwind CSS 4, shadcn/ui, Framer Motion
+- **Estado:** Zustand (carrito con persistencia localStorage)
+- **Auth:** JWT con jose + bcryptjs
+- **Email:** Nodemailer (SMTP)
+- **WhatsApp:** Baileys (conexion directa)
+
+## Requisitos
+
+- Node.js 18+
+- npm 9+
+
+## Desarrollo Local
 
 ```bash
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.production.example .env
+
+# Generar cliente de Prisma
+npx prisma generate
+
+# Ejecutar migraciones
+npx prisma migrate dev
+
+# Iniciar servidor de desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La app estara disponible en http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de Entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Las variables necesarias estan definidas en `.env.production.example`:
 
-## Learn More
+| Variable | Descripcion |
+|---|---|
+| `DATABASE_URL` | Ruta a la base de datos SQLite |
+| `JWT_SECRET` | Secreto para firmar tokens JWT |
+| `ADMIN_EMAIL` | Email del administrador |
+| `ADMIN_PASSWORD_HASH` | Hash bcrypt de la contrasena admin |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Configuracion SMTP para correos |
+| `WHATSAPP_TO` | Numero de WhatsApp destino |
+| `NEXT_PUBLIC_SITE_URL` | URL del sitio |
 
-To learn more about Next.js, take a look at the following resources:
+Genera un JWT_SECRET con:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Genera un hash de contrasena con:
 
-## Deploy on Vercel
+```bash
+node -e "console.log(require('bcryptjs').hashSync('tu contrasena', 10))"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura del Proyecto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+exacontable/
+├── app/
+│   ├── admin/              # Panel de administracion
+│   ├── api/                # API routes (cart, checkout, orders, etc.)
+│   ├── checkout/           # Pagina de checkout
+│   ├── gracias/            # Pagina de agradecimiento
+│   └── mis-pedidos/        # Consulta de pedidos
+├── components/
+│   ├── admin/              # Componentes del admin
+│   ├── layout/             # Navbar, cart, WhatsApp
+│   ├── plans/              # Cards y builder de planes
+│   ├── sections/           # Secciones de la landing page
+│   └── ui/                 # Componentes base (shadcn)
+├── hooks/                  # Custom hooks (use-cart, use-products)
+├── lib/                    # Utilidades (auth, email, store, whatsapp)
+├── prisma/                 # Schema y migraciones
+├── public/                 # Assets estaticos
+└── scripts/                # Scripts de utilidad
+```
+
+## Comandos
+
+```bash
+npm run dev          # Servidor de desarrollo
+npm run build        # Build de produccion
+npm start            # Iniciar en produccion
+npm run lint         # Ejecutar linter
+npm run deploy       # Build + preparar carpeta deploy/
+```
+
+---
+
+## Despliegue en cPanel
+
+### 1. Preparar el build
+
+Desde tu maquina local:
+
+```bash
+npm run deploy
+```
+
+Esto genera la carpeta `deploy/` con el build standalone de Next.js, dependencias, base de datos y archivos estaticos.
+
+### 2. Subir archivos a cPanel
+
+Sube TODO el contenido de la carpeta `deploy/` a tu hosting usando:
+
+- **File Manager** de cPanel (Subir archivos), o
+- **FTP/SFTP** con un cliente como FileZilla
+
+Si tu sitio esta en un subdirectorio (ej: `public_html/exacontable`), sube ahi.
+
+### 3. Instalar dependencias en el servidor
+
+En cPanel > **Terminal** (o via SSH):
+
+```bash
+cd ~/public_html/exacontable   # ajusta la ruta
+npm install
+```
+
+Esto reinstala las dependencias nativas (better-sqlite3) compiladas para Linux y ejecuta `prisma generate`.
+
+### 4. Configurar variables de entorno
+
+Edita el archivo `.env` en el servidor con tus credenciales reales. Puedes usar File Manager o el terminal:
+
+```bash
+nano .env
+```
+
+Asegurate de tener valores reales para:
+- `JWT_SECRET`
+- `ADMIN_PASSWORD_HASH`
+- `SMTP_*`
+- `WHATSAPP_TO`
+
+### 5. Configurar Node.js en cPanel
+
+En cPanel busca **"Setup Node.js App"** o **"Node.js Selector"**:
+
+| Campo | Valor |
+|---|---|
+| Application mode | Production |
+| Node.js version | 18+ (la disponible) |
+| Application root | `public_html/exacontable` (o tu ruta) |
+| Application startup file | `server.js` |
+
+### 6. Iniciar la aplicacion
+
+Haz click en **"Start"** en el Node.js Selector.
+
+La app estara disponible en tu dominio. Si cPanel asigna un puerto (ej: 3000), el proxy reverso ya deberia redirigir al dominio.
+
+### 7. Base de datos
+
+La base de datos SQLite se crea automaticamente en `prisma/exacontable.db` al iniciar.
+
+Para migrar despues de actualizaciones:
+
+```bash
+npx prisma migrate deploy
+```
+
+### Actualizaciones
+
+Para actualizar el despliegue:
+
+1. Ejecuta `npm run deploy` en local
+2. Sube los nuevos archivos al servidor (sobreescribe)
+3. Ejecuta `npm install` en el servidor
+4. Reinicia la app desde cPanel
+
+### Solucion de problemas
+
+**La app no inicia:**
+- Verifica que `server.js` este en la raiz del directorio
+- Revisa los logs en cPanel > Node.js Selector > "Logs"
+- Asegurate de que Node.js 18+ este seleccionado
+
+**Error de better-sqlite3:**
+- Ejecuta `npm rebuild better-sqlite3 --build-from-source` en el servidor
+
+**Error de Prisma:**
+- Ejecuta `npx prisma generate` y `npx prisma migrate deploy`
+
+**Puerto en uso:**
+- En cPanel, verifica que el puerto configurado este libre o cambia el valor de `PORT` en `.env`
+
+## Licencia
+
+Propietario - ExaContable
