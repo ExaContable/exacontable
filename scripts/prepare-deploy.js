@@ -18,6 +18,26 @@ function copyRecursive(src, dest) {
   }
 }
 
+function replaceTracedNativePackage(packagePrefix, canonicalName) {
+  const tracedModules = path.resolve(DEPLOY_DIR, ".next", "node_modules");
+  if (!fs.existsSync(tracedModules)) return;
+
+  for (const entry of fs.readdirSync(tracedModules)) {
+    if (!entry.startsWith(`${packagePrefix}-`)) continue;
+    const packageDir = path.resolve(tracedModules, entry);
+    fs.rmSync(packageDir, { recursive: true });
+    fs.mkdirSync(packageDir, { recursive: true });
+    fs.writeFileSync(
+      path.resolve(packageDir, "package.json"),
+      JSON.stringify({ name: entry, version: "0.0.0", main: "index.js" }, null, 2)
+    );
+    fs.writeFileSync(
+      path.resolve(packageDir, "index.js"),
+      `module.exports = require(${JSON.stringify(canonicalName)});\n`
+    );
+  }
+}
+
 function main() {
   console.log("Preparando deploy para cPanel...\n");
 
@@ -37,13 +57,30 @@ function main() {
   // 1. Copy standalone output (includes server.js, .next, node_modules)
   console.log("Copiando build standalone...");
   copyRecursive(STANDALONE_DIR, DEPLOY_DIR);
+  replaceTracedNativePackage("better-sqlite3", "better-sqlite3");
+  replaceTracedNativePackage("sharp", "sharp");
 
   // The build may be prepared on Windows while cPanel runs Linux. Never ship
   // native Windows binaries (sharp, better-sqlite3) to the server: npm must
   // install the production dependencies for cPanel's own OS and Node version.
   const bundledNodeModules = path.resolve(DEPLOY_DIR, "node_modules");
   if (fs.existsSync(bundledNodeModules)) {
+    const vendorNodeModules = path.resolve(DEPLOY_DIR, "vendor", "node_modules");
+    fs.mkdirSync(path.dirname(vendorNodeModules), { recursive: true });
+    copyRecursive(bundledNodeModules, vendorNodeModules);
     fs.rmSync(bundledNodeModules, { recursive: true });
+
+    // These packages contain platform-specific binaries. CloudLinux installs
+    // their Linux builds in its managed node_modules symlink.
+    for (const nativePath of [
+      path.resolve(vendorNodeModules, "better-sqlite3"),
+      path.resolve(vendorNodeModules, "sharp"),
+      path.resolve(vendorNodeModules, "@img"),
+      path.resolve(vendorNodeModules, "next", "node_modules", "sharp"),
+      path.resolve(vendorNodeModules, "next", "node_modules", "@img"),
+    ]) {
+      if (fs.existsSync(nativePath)) fs.rmSync(nativePath, { recursive: true });
+    }
   }
   const bundledWhatsAppAuth = path.resolve(DEPLOY_DIR, "whatsapp-auth");
   if (fs.existsSync(bundledWhatsAppAuth)) {
@@ -60,6 +97,11 @@ function main() {
     fs.copyFileSync(rootServerJs, path.resolve(DEPLOY_DIR, "server.js"));
     console.log("✓ server.js");
   }
+  fs.copyFileSync(
+    path.resolve(ROOT, "scripts", "init-production-db.js"),
+    path.resolve(DEPLOY_DIR, "init-db.js")
+  );
+  console.log("✓ init-db.js");
 
   // 3. Copy public/ directory
   const publicDir = path.resolve(ROOT, "public");
@@ -101,21 +143,17 @@ function main() {
     },
     scripts: {
       start: "node server.js",
-      postinstall: "prisma generate",
     },
-    dependencies: rootPkg.dependencies,
+    dependencies: {
+      "better-sqlite3": rootPkg.dependencies["better-sqlite3"],
+      sharp: rootPkg.dependencies.sharp,
+    },
   };
   fs.writeFileSync(
     path.resolve(DEPLOY_DIR, "package.json"),
     JSON.stringify(deployPkg, null, 2)
   );
   console.log("✓ package.json (deploy)");
-
-  const packageLock = path.resolve(ROOT, "package-lock.json");
-  if (fs.existsSync(packageLock)) {
-    fs.copyFileSync(packageLock, path.resolve(DEPLOY_DIR, "package-lock.json"));
-    console.log("✓ package-lock.json");
-  }
 
   // 7. Copy prisma schema and migrations if they exist (for SQLite)
   const prismaSchema = path.resolve(ROOT, "prisma", "schema.prisma");
@@ -153,15 +191,12 @@ Sube TODO el contenido de esta carpeta a tu directorio de hosting en cPanel.
 Puedes usar File Manager o FTP.
 
 ### 2. Instalar dependencias
-En cPanel > Terminal (o SSH), navega a tu directorio y ejecuta:
-\`\`\`bash
-npm ci --omit=dev
-\`\`\`
-Esto instalará las dependencias y ejecutará prisma generate + rebuild de better-sqlite3.
+En cPanel > Setup Node.js App, pulsa **Ejecutar NPM Install**.
+El paquete de despliegue solo instala los modulos nativos necesarios para Linux.
 
 ### 3. Configurar variables de entorno
-Configura estas variables directamente en cPanel. Tambien puedes copiar
-\`.env.example\` a \`.env\` en el servidor y reemplazar sus valores:
+En Setup Node.js App > Environment variables, pulsa **Anadir variable** y usa
+\`.env.example\` como referencia:
 - JWT_SECRET: genera con \`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"\`
 - ADMIN_PASSWORD_HASH: genera con \`node -e "console.log(require('bcryptjs').hashSync('tu_password', 10))"\`
 - SMTP_*: configuración de tu proveedor de correo
@@ -182,15 +217,12 @@ Si usas un dominio, configura el Proxy Pass en cPanel para que
 redirija al puerto de Node.js (ver paso 4).
 
 ## Base de datos
-La base de datos SQLite se crea automáticamente en \`prisma/exacontable.db\`.
-Para migrar la base de datos después de actualizaciones:
-\`\`\`bash
-npx prisma migrate deploy
-\`\`\`
+La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
+iniciar la aplicacion. No hace falta ejecutar Prisma ni usar el Terminal.
 
 ## Archivos importantes
 - server.js: punto de entrada de la aplicación
-- .env: variables de entorno (NO subir a repositorios)
+- .env.example: referencia para las variables de Setup Node.js App
 - prisma/: esquema y migraciones de la base de datos
 - public/: archivos estáticos
 `;
@@ -213,8 +245,8 @@ npx prisma migrate deploy
   }
   console.log(`\n📦 Instrucciones:`);
   console.log(`   1. Sube la carpeta 'deploy/' a tu hosting cPanel`);
-  console.log(`   2. En cPanel > Terminal, ejecuta: npm ci --omit=dev`);
-  console.log(`   3. Edita el archivo .env con tus credenciales reales`);
+  console.log(`   2. En Setup Node.js App, pulsa: Ejecutar NPM Install`);
+  console.log(`   3. Agrega las variables en Setup Node.js App`);
   console.log(`   4. En cPanel > Node.js Selector, configura:`);
   console.log(`      - Application mode: Production`);
   console.log(`      - Node.js version: 22 LTS (recomendado) o 24`);

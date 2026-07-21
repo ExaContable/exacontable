@@ -122,22 +122,15 @@ Si tu sitio esta en un subdirectorio (ej: `public_html/exacontable`), sube ahi.
 
 ### 3. Instalar dependencias en el servidor
 
-En cPanel > **Terminal** (o via SSH):
-
-```bash
-cd ~/public_html/exacontable   # ajusta la ruta
-npm ci --omit=dev
-```
-
-Esto instala desde el lockfile las dependencias nativas (`better-sqlite3` y `sharp`) compiladas para Linux y ejecuta `prisma generate`. No subas la carpeta `node_modules` creada en Windows.
+En cPanel > **Setup Node.js App**, pulsa **Ejecutar NPM Install**. El artefacto
+standalone incluye las dependencias JavaScript y cPanel solo instala para Linux
+los modulos nativos `better-sqlite3` y `sharp`. No hace falta usar Terminal.
 
 ### 4. Configurar variables de entorno
 
-Edita el archivo `.env` en el servidor con tus credenciales reales. Puedes usar File Manager o el terminal:
-
-```bash
-nano .env
-```
+En **Setup Node.js App > Environment variables**, pulsa **Añadir variable** y
+registra los valores indicados en `.env.example`. No hace falta crear ni editar
+un archivo `.env` desde Terminal.
 
 Asegurate de tener valores reales para:
 - `JWT_SECRET`
@@ -164,13 +157,8 @@ La app estara disponible en tu dominio. Si cPanel asigna un puerto (ej: 3000), e
 
 ### 7. Base de datos
 
-La base de datos SQLite se crea automaticamente en `prisma/exacontable.db` al iniciar.
-
-Para migrar despues de actualizaciones:
-
-```bash
-npx prisma migrate deploy
-```
+La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
+iniciar. No hace falta ejecutar Prisma manualmente.
 
 ### Actualizaciones
 
@@ -178,7 +166,7 @@ Para actualizar el despliegue:
 
 1. Ejecuta `npm run deploy` en local
 2. Sube los nuevos archivos al servidor (sobreescribe)
-3. Ejecuta `npm ci --omit=dev` en el servidor
+3. Pulsa **Ejecutar NPM Install** en Setup Node.js App
 4. Reinicia la app desde cPanel
 
 ### Solucion de problemas
@@ -188,16 +176,16 @@ Para actualizar el despliegue:
 - Revisa los logs en cPanel > Node.js Selector > "Logs"
 - Asegurate de que Node.js 22 LTS o 24 este seleccionado
 
-**El boton "Run NPM Install" solo muestra `Error`:**
-- Abre cPanel > Terminal, activa el entorno virtual que muestra "Setup Node.js App" y ejecuta `npm ci --omit=dev` dentro del Application root. El terminal muestra el error real.
-- Verifica que `package-lock.json`, `prisma.config.ts` y `prisma/schema.prisma` esten en el servidor.
-- Si el hosting no permite compilar modulos nativos, solicita al proveedor soporte para `better-sqlite3` o usa PostgreSQL en produccion.
+**El boton "Ejecutar NPM Install" muestra `Error`:**
+- Verifica que hayas subido la version mas reciente de la carpeta `deploy`.
+- Comprueba que `package.json` solo declare `better-sqlite3` y `sharp`.
+- Si aun falla, solicita al proveedor soporte para modulos nativos de Node.js.
 
 **Error de better-sqlite3:**
 - Ejecuta `npm rebuild better-sqlite3 --build-from-source` en el servidor
 
-**Error de Prisma:**
-- Ejecuta `npx prisma generate` y `npx prisma migrate deploy`
+**Error de base de datos:**
+- Verifica que `DATABASE_URL` sea `file:./prisma/exacontable.db` y reinicia la aplicacion.
 
 **Puerto en uso:**
 - En cPanel, verifica que el puerto configurado este libre o cambia el valor de `PORT` en `.env`

@@ -11,15 +11,12 @@ Sube TODO el contenido de esta carpeta a tu directorio de hosting en cPanel.
 Puedes usar File Manager o FTP.
 
 ### 2. Instalar dependencias
-En cPanel > Terminal (o SSH), navega a tu directorio y ejecuta:
-```bash
-npm ci --omit=dev
-```
-Esto instalará las dependencias y ejecutará prisma generate + rebuild de better-sqlite3.
+En cPanel > Setup Node.js App, pulsa **Ejecutar NPM Install**.
+El paquete de despliegue solo instala los modulos nativos necesarios para Linux.
 
 ### 3. Configurar variables de entorno
-Configura estas variables directamente en cPanel. Tambien puedes copiar
-`.env.example` a `.env` en el servidor y reemplazar sus valores:
+En Setup Node.js App > Environment variables, pulsa **Anadir variable** y usa
+`.env.example` como referencia:
 - JWT_SECRET: genera con `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 - ADMIN_PASSWORD_HASH: genera con `node -e "console.log(require('bcryptjs').hashSync('tu_password', 10))"`
 - SMTP_*: configuración de tu proveedor de correo
@@ -40,14 +37,11 @@ Si usas un dominio, configura el Proxy Pass en cPanel para que
 redirija al puerto de Node.js (ver paso 4).
 
 ## Base de datos
-La base de datos SQLite se crea automáticamente en `prisma/exacontable.db`.
-Para migrar la base de datos después de actualizaciones:
-```bash
-npx prisma migrate deploy
-```
+La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
+iniciar la aplicacion. No hace falta ejecutar Prisma ni usar el Terminal.
 
 ## Archivos importantes
 - server.js: punto de entrada de la aplicación
-- .env: variables de entorno (NO subir a repositorios)
+- .env.example: referencia para las variables de Setup Node.js App
 - prisma/: esquema y migraciones de la base de datos
 - public/: archivos estáticos

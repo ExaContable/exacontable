@@ -1,3 +1,16 @@
+const path = require("path");
+const Module = require("module");
+
+// Standalone JavaScript dependencies are bundled under vendor so CloudLinux
+// can keep ownership of the application-root node_modules symlink.
+process.env.NODE_PATH = [
+  path.join(__dirname, "vendor", "node_modules"),
+  process.env.NODE_PATH,
+].filter(Boolean).join(path.delimiter);
+Module._initPaths();
+
+require("./init-db").initializeProductionDatabase();
+
 const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
