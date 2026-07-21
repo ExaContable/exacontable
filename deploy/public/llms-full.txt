@@ -1,0 +1,105 @@
+# EXA Contable
+
+> Sistema contable y financiero con facturación electrónica SRI para empresas de Ecuador. Control de inventario, compras, ventas, reportes financieros y más en la nube.
+
+## Descripción del Producto
+
+EXA Contable es una plataforma SaaS de contabilidad y gestión financiera diseñada específicamente para el mercado ecuatoriano. Integra facturación electrónica con el SRI, control de inventario, gestión de compras/ventas, reportes financieros y herramientas para contadores. Más de 500 empresas ecuatorianas lo utilizan. Fundado hace más de 7 años con sede en Machala, El Oro, Ecuador.
+
+### Facturación Electrónica SRI
+
+Integración directa con el SRI para emitir y recibir comprobantes electrónicos:
+- Facturas electrónicas
+- Notas de Crédito y Débito
+- Guías de Remisión
+- Liquidaciones de Compra
+- Comprobantes de Retención
+- Firma electrónica (.p12) de entidades certificadoras ecuatorianas
+- Autorización SRI en segundos
+- Envío automático de PDF y XML al cliente
+
+### Control de Inventario
+
+- Gestión multi-bodega
+- Kardex electrónico
+- Alertas de stock bajo
+- Control de productos y servicios
+
+### Compras y Ventas
+
+- Registro de órdenes de compra
+- Control de cuentas por cobrar y pagar
+- Generación de Anexos Transaccionales (ATS)
+- Conciliación bancaria
+
+### Reportes Financieros
+
+- Dashboard con 15+ KPIs en tiempo real
+- Balance General
+- Estado de Resultados
+- Flujo de Caja
+- Reportes personalizados exportables
+
+### Seguridad
+
+- Encriptación SSL de grado bancario
+- Respaldos automáticos diarios
+- Autenticación de dos factores
+- Cumplimiento ISO 27001
+- 99.9% uptime garantizado
+
+### Soporte
+
+- Soporte técnico local en Ecuador
+- Atención por WhatsApp, teléfono y email
+- Horario comercial extendido
+- Capacitación inicial personalizada
+- Respuesta en menos de 2 horas
+
+## Planes
+
+### Sistema Contable
+
+- Plan Emprendedor: Ideal para negocios en crecimiento. Facturación ilimitada, control de inventario básico, 1 usuario.
+- Plan Ejecutivo: Para empresas consolidadas. Incluye multi-bodega, ATS, reportes financieros, 3 usuarios.
+- Plan Corporativo: Para grandes empresas. Contabilidad general, API abierta, usuarios ilimitados, soporte 24/7.
+
+### Contador
+
+Planes especializados para contadores y firmas contables con acceso multi-cliente.
+
+### Facturación Electrónica
+
+Plan independiente de facturación electrónica SRI con 3 niveles (Básico, Ideal, Ilimitado).
+
+### Modalidades de Pago
+
+- Mensual: Pago mensual sin compromiso anual.
+- Anual: 20% de descuento sobre el precio mensual.
+- Compra Total: Pago único por la licencia perpetua.
+
+## Preguntas Frecuentes
+
+1. ¿Qué es EXA? Sistema contable integral para empresas ecuatorianas con facturación SRI, inventario y reportes.
+2. ¿Cómo funciona la facturación SRI? Integración directa con SRI para autorización automática de comprobantes.
+3. ¿Qué planes hay? Sistema Contable, Contador y Facturación Electrónica en 3 modalidades de pago.
+4. ¿Hay prueba gratuita? Sí, 15 días de prueba sin tarjeta de crédito.
+5. ¿Cómo migrar datos? Soporte guía la migración desde Excel, CSV o sistema anterior.
+6. ¿Es seguro? Encriptación SSL, backups diarios, 2FA, ISO 27001.
+7. ¿Qué requisitos técnicos? Solo un navegador web moderno y conexión a internet.
+8. ¿Hay soporte? Sí, todos los planes incluyen soporte técnico local.
+9. ¿Acceso multi-dispositivo? Sí, 100% web responsive.
+10. ¿Actualizaciones SRI? Automáticas ante cualquier cambio normativo.
+
+## Información de Contacto
+
+- WhatsApp: https://wa.me/593978835575
+- Email: info@exacontable.com
+- Teléfono: +593 97 883 5575
+- Dirección: La Aurora, Calle los Ceibos, Machala, El Oro, Ecuador
+- Instagram: https://instagram.com/exacontable
+- Portal Cliente: https://exa.ofsercont.com/
+
+## Reducción de Palabras Clave
+
+EXA, EXA Contable, sistema contable Ecuador, facturación electrónica SRI, contabilidad en la nube, software contable ecuatoriano, inventario Ecuador, reportes financieros, PYMES Ecuador, Machala, El Oro.

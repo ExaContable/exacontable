@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /carrito/
+Disallow: /checkout/
+Disallow: /mis-pedidos/
+
+Sitemap: https://exacontable.com/sitemap.xml

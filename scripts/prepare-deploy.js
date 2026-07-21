@@ -45,6 +45,14 @@ function main() {
   if (fs.existsSync(bundledNodeModules)) {
     fs.rmSync(bundledNodeModules, { recursive: true });
   }
+  const bundledWhatsAppAuth = path.resolve(DEPLOY_DIR, "whatsapp-auth");
+  if (fs.existsSync(bundledWhatsAppAuth)) {
+    fs.rmSync(bundledWhatsAppAuth, { recursive: true });
+  }
+  const bundledEnv = path.resolve(DEPLOY_DIR, ".env");
+  if (fs.existsSync(bundledEnv)) {
+    fs.rmSync(bundledEnv);
+  }
 
   // 2. Copy server.js (overrides standalone's default if exists)
   const rootServerJs = path.resolve(ROOT, "server.js");
@@ -57,18 +65,21 @@ function main() {
   const publicDir = path.resolve(ROOT, "public");
   if (fs.existsSync(publicDir)) {
     copyRecursive(publicDir, path.resolve(DEPLOY_DIR, "public"));
+    // Runtime uploads can contain customer receipts and must never be included
+    // in a source-controlled deployment artifact.
+    const deployUploads = path.resolve(DEPLOY_DIR, "public", "uploads");
+    if (fs.existsSync(deployUploads)) {
+      fs.rmSync(deployUploads, { recursive: true });
+    }
     console.log("✓ public/");
   }
 
-  // 4. Copy .env.production if it exists, otherwise copy .env.production.example
-  const envProd = path.resolve(ROOT, ".env.production");
+  // 4. Ship only the environment template. Real production credentials must
+  // be configured directly in cPanel and never committed with the artifact.
   const envExample = path.resolve(ROOT, ".env.production.example");
-  if (fs.existsSync(envProd)) {
-    fs.copyFileSync(envProd, path.resolve(DEPLOY_DIR, ".env"));
-    console.log("✓ .env (desde .env.production)");
-  } else if (fs.existsSync(envExample)) {
-    fs.copyFileSync(envExample, path.resolve(DEPLOY_DIR, ".env"));
-    console.log("✓ .env (desde .env.production.example)");
+  if (fs.existsSync(envExample)) {
+    fs.copyFileSync(envExample, path.resolve(DEPLOY_DIR, ".env.example"));
+    console.log("✓ .env.example");
   }
 
   // 5. Copy .htaccess
@@ -125,12 +136,8 @@ function main() {
     console.log("✓ prisma/");
   }
 
-  // 8. Copy WhatsApp auth directory if it exists
-  const waAuth = path.resolve(ROOT, "whatsapp-auth");
-  if (fs.existsSync(waAuth)) {
-    copyRecursive(waAuth, path.resolve(DEPLOY_DIR, "whatsapp-auth"));
-    console.log("✓ whatsapp-auth/");
-  }
+  // WhatsApp session credentials are runtime secrets. They must be created or
+  // restored directly on the server, never copied into the deploy artifact.
 
   // 9. Create deployment instructions file
   const instructions = `# ExaContable - Instrucciones de Despliegue en cPanel
@@ -153,7 +160,8 @@ npm ci --omit=dev
 Esto instalará las dependencias y ejecutará prisma generate + rebuild de better-sqlite3.
 
 ### 3. Configurar variables de entorno
-Edita el archivo \`.env\` con tus valores reales:
+Configura estas variables directamente en cPanel. Tambien puedes copiar
+\`.env.example\` a \`.env\` en el servidor y reemplazar sus valores:
 - JWT_SECRET: genera con \`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"\`
 - ADMIN_PASSWORD_HASH: genera con \`node -e "console.log(require('bcryptjs').hashSync('tu_password', 10))"\`
 - SMTP_*: configuración de tu proveedor de correo

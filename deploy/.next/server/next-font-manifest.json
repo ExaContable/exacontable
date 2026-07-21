@@ -1,0 +1,67 @@
+{
+  "app": {
+    "[project]/app/_not-found/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/configuracion/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/login/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/metodos-pago/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/ordenes/[id]/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/ordenes/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/planes/nuevo/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/planes/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/admin/whatsapp/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/carrito/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/checkout/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/gracias/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/mis-pedidos/[order_id]/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ],
+    "[project]/app/page": [
+      "static/media/c41ca59f1c34ba31-s.p.2y2uoi4t910qy.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.1gsd1jahc5dg_.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

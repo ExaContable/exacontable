@@ -1,0 +1,3 @@
+{
+  "/api/cart/remove-item/route": "app/api/cart/remove-item/route.js"
+}
