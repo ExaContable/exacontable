@@ -9,8 +9,6 @@ process.env.NODE_PATH = [
 ].filter(Boolean).join(path.delimiter);
 Module._initPaths();
 
-require("./init-db").initializeProductionDatabase();
-
 const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");

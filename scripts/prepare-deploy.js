@@ -57,7 +57,6 @@ function main() {
   // 1. Copy standalone output (includes server.js, .next, node_modules)
   console.log("Copiando build standalone...");
   copyRecursive(STANDALONE_DIR, DEPLOY_DIR);
-  replaceTracedNativePackage("better-sqlite3", "better-sqlite3");
   replaceTracedNativePackage("sharp", "sharp");
 
   // The build may be prepared on Windows while cPanel runs Linux. Never ship
@@ -73,7 +72,6 @@ function main() {
     // These packages contain platform-specific binaries. CloudLinux installs
     // their Linux builds in its managed node_modules symlink.
     for (const nativePath of [
-      path.resolve(vendorNodeModules, "better-sqlite3"),
       path.resolve(vendorNodeModules, "sharp"),
       path.resolve(vendorNodeModules, "@img"),
       path.resolve(vendorNodeModules, "next", "node_modules", "sharp"),
@@ -97,11 +95,6 @@ function main() {
     fs.copyFileSync(rootServerJs, path.resolve(DEPLOY_DIR, "server.js"));
     console.log("✓ server.js");
   }
-  fs.copyFileSync(
-    path.resolve(ROOT, "scripts", "init-production-db.js"),
-    path.resolve(DEPLOY_DIR, "init-db.js")
-  );
-  console.log("✓ init-db.js");
 
   // 3. Copy public/ directory
   const publicDir = path.resolve(ROOT, "public");
@@ -143,10 +136,8 @@ function main() {
     },
     scripts: {
       start: "node server.js",
-      postinstall: "npm rebuild better-sqlite3 --build-from-source",
     },
     dependencies: {
-      "better-sqlite3": rootPkg.dependencies["better-sqlite3"],
       sharp: rootPkg.dependencies.sharp,
     },
   };
@@ -183,7 +174,7 @@ function main() {
 
 ## Requisitos
 - Node.js 22 LTS o Node.js 24 (configurar en cPanel > Node.js Selector)
-- SQLite (incluido, no necesita configuración externa)
+- Prisma Postgres (configurar DATABASE_URL en Setup Node.js App)
 
 ## Pasos
 
@@ -193,7 +184,8 @@ Puedes usar File Manager o FTP.
 
 ### 2. Instalar dependencias
 En cPanel > Setup Node.js App, pulsa **Ejecutar NPM Install**.
-El paquete de despliegue solo instala los modulos nativos necesarios para Linux.
+El paquete de despliegue solo instala Sharp; PostgreSQL no requiere modulos
+nativos ni compiladores en cPanel.
 
 ### 3. Configurar variables de entorno
 En Setup Node.js App > Environment variables, pulsa **Anadir variable** y usa
@@ -218,8 +210,8 @@ Si usas un dominio, configura el Proxy Pass en cPanel para que
 redirija al puerto de Node.js (ver paso 4).
 
 ## Base de datos
-La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
-iniciar la aplicacion. No hace falta ejecutar Prisma ni usar el Terminal.
+La migracion y el seed se aplican previamente a Prisma Postgres. En cPanel solo
+debes agregar DATABASE_URL en Environment variables; no hace falta usar Terminal.
 
 ## Archivos importantes
 - server.js: punto de entrada de la aplicación

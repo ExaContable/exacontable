@@ -2,7 +2,7 @@
 
 ## Requisitos
 - Node.js 22 LTS o Node.js 24 (configurar en cPanel > Node.js Selector)
-- SQLite (incluido, no necesita configuración externa)
+- Prisma Postgres (configurar DATABASE_URL en Setup Node.js App)
 
 ## Pasos
 
@@ -12,7 +12,8 @@ Puedes usar File Manager o FTP.
 
 ### 2. Instalar dependencias
 En cPanel > Setup Node.js App, pulsa **Ejecutar NPM Install**.
-El paquete de despliegue solo instala los modulos nativos necesarios para Linux.
+El paquete de despliegue solo instala Sharp; PostgreSQL no requiere modulos
+nativos ni compiladores en cPanel.
 
 ### 3. Configurar variables de entorno
 En Setup Node.js App > Environment variables, pulsa **Anadir variable** y usa
@@ -37,8 +38,8 @@ Si usas un dominio, configura el Proxy Pass en cPanel para que
 redirija al puerto de Node.js (ver paso 4).
 
 ## Base de datos
-La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
-iniciar la aplicacion. No hace falta ejecutar Prisma ni usar el Terminal.
+La migracion y el seed se aplican previamente a Prisma Postgres. En cPanel solo
+debes agregar DATABASE_URL en Environment variables; no hace falta usar Terminal.
 
 ## Archivos importantes
 - server.js: punto de entrada de la aplicación

@@ -5,7 +5,7 @@ Plataforma web para la venta y gestion de planes de contabilidad en linea. Inclu
 ## Stack Tecnologico
 
 - **Framework:** Next.js 16 (App Router, standalone output)
-- **Base de datos:** SQLite con Prisma ORM
+- **Base de datos:** Prisma Postgres con Prisma ORM
 - **UI:** Tailwind CSS 4, shadcn/ui, Framer Motion
 - **Estado:** Zustand (carrito con persistencia localStorage)
 - **Auth:** JWT con jose + bcryptjs
@@ -123,10 +123,8 @@ Si tu sitio esta en un subdirectorio (ej: `public_html/exacontable`), sube ahi.
 ### 3. Instalar dependencias en el servidor
 
 En cPanel > **Setup Node.js App**, pulsa **Ejecutar NPM Install**. El artefacto
-standalone incluye las dependencias JavaScript y cPanel solo instala para Linux
-los modulos nativos `better-sqlite3` y `sharp`. Durante la instalacion,
-`better-sqlite3` se recompila automaticamente para la version de Linux de
-CloudLinux. No hace falta usar Terminal.
+standalone incluye las dependencias JavaScript y cPanel solo instala `sharp`.
+PostgreSQL no necesita modulos nativos ni compiladores. No hace falta usar Terminal.
 
 ### 4. Configurar variables de entorno
 
@@ -159,8 +157,8 @@ La app estara disponible en tu dominio. Si cPanel asigna un puerto (ej: 3000), e
 
 ### 7. Base de datos
 
-La base de datos SQLite y sus tablas se crean o actualizan automaticamente al
-iniciar. No hace falta ejecutar Prisma manualmente.
+La migracion y el seed se aplican previamente a Prisma Postgres. En cPanel solo
+debes configurar `DATABASE_URL` en las variables de Setup Node.js App.
 
 ### Actualizaciones
 
@@ -180,14 +178,11 @@ Para actualizar el despliegue:
 
 **El boton "Ejecutar NPM Install" muestra `Error`:**
 - Verifica que hayas subido la version mas reciente de la carpeta `deploy`.
-- Comprueba que `package.json` solo declare `better-sqlite3` y `sharp`.
-- Si aun falla, solicita al proveedor soporte para modulos nativos de Node.js.
-
-**Error de better-sqlite3:**
-- Ejecuta `npm rebuild better-sqlite3 --build-from-source` en el servidor
+- Comprueba que `package.json` solo declare `sharp`.
+- Si aun falla, revisa el log de instalacion de Node.js en cPanel.
 
 **Error de base de datos:**
-- Verifica que `DATABASE_URL` sea `file:./prisma/exacontable.db` y reinicia la aplicacion.
+- Verifica que `DATABASE_URL` sea la URL de Prisma Postgres y reinicia la aplicacion.
 
 **Puerto en uso:**
 - En cPanel, verifica que el puerto configurado este libre o cambia el valor de `PORT` en `.env`

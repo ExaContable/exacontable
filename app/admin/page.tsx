@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { DashboardClient } from "./DashboardClient"
 
+export const dynamic = "force-dynamic"
+
 async function getStats() {
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
