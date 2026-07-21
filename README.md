@@ -124,7 +124,9 @@ Si tu sitio esta en un subdirectorio (ej: `public_html/exacontable`), sube ahi.
 
 En cPanel > **Setup Node.js App**, pulsa **Ejecutar NPM Install**. El artefacto
 standalone incluye las dependencias JavaScript y cPanel solo instala para Linux
-los modulos nativos `better-sqlite3` y `sharp`. No hace falta usar Terminal.
+los modulos nativos `better-sqlite3` y `sharp`. Durante la instalacion,
+`better-sqlite3` se recompila automaticamente para la version de Linux de
+CloudLinux. No hace falta usar Terminal.
 
 ### 4. Configurar variables de entorno
 

@@ -143,6 +143,7 @@ function main() {
     },
     scripts: {
       start: "node server.js",
+      postinstall: "npm rebuild better-sqlite3 --build-from-source",
     },
     dependencies: {
       "better-sqlite3": rootPkg.dependencies["better-sqlite3"],
