@@ -4,9 +4,11 @@ const next = require("next");
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOST || "0.0.0.0";
-const port = parseInt(process.env.PORT || "3000", 10);
+// Evitamos parseInt estricto por si Passenger inyecta un socket/pipe en PORT
+const port = process.env.PORT || 3000;
+const nextPort = typeof port === 'string' && isNaN(Number(port)) ? 3000 : Number(port);
 
-const app = next({ dev, hostname, port });
+const app = next({ dev, hostname, port: nextPort });
 const handle = app.getRequestHandler();
 
 app
@@ -21,8 +23,9 @@ app
         res.statusCode = 500;
         res.end("Internal server error");
       }
-    }).listen(port, hostname, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
+    }).listen(port, () => {
+      // En cPanel Passenger no se recomienda pasar el hostname a listen()
+      console.log(`> Ready on port ${port}`);
       console.log(`> Environment: ${dev ? "development" : "production"}`);
     });
   })
