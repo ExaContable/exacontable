@@ -38,6 +38,14 @@ function main() {
   console.log("Copiando build standalone...");
   copyRecursive(STANDALONE_DIR, DEPLOY_DIR);
 
+  // The build may be prepared on Windows while cPanel runs Linux. Never ship
+  // native Windows binaries (sharp, better-sqlite3) to the server: npm must
+  // install the production dependencies for cPanel's own OS and Node version.
+  const bundledNodeModules = path.resolve(DEPLOY_DIR, "node_modules");
+  if (fs.existsSync(bundledNodeModules)) {
+    fs.rmSync(bundledNodeModules, { recursive: true });
+  }
+
   // 2. Copy server.js (overrides standalone's default if exists)
   const rootServerJs = path.resolve(ROOT, "server.js");
   if (fs.existsSync(rootServerJs)) {
@@ -70,16 +78,19 @@ function main() {
     console.log("✓ .htaccess");
   }
 
-  // 6. Create deploy-specific package.json with postinstall for native modules
+  // 6. Create deploy-specific package.json. cPanel installs the native Linux
+  // dependencies and Prisma generates its client during npm install.
   const rootPkg = JSON.parse(fs.readFileSync(path.resolve(ROOT, "package.json"), "utf8"));
   const deployPkg = {
     name: rootPkg.name,
     version: rootPkg.version,
     private: true,
+    engines: {
+      node: ">=22 <25",
+    },
     scripts: {
       start: "node server.js",
-      "postinstall":
-        "prisma generate && npm rebuild better-sqlite3 --build-from-source || true",
+      postinstall: "prisma generate",
     },
     dependencies: rootPkg.dependencies,
   };
@@ -88,6 +99,12 @@ function main() {
     JSON.stringify(deployPkg, null, 2)
   );
   console.log("✓ package.json (deploy)");
+
+  const packageLock = path.resolve(ROOT, "package-lock.json");
+  if (fs.existsSync(packageLock)) {
+    fs.copyFileSync(packageLock, path.resolve(DEPLOY_DIR, "package-lock.json"));
+    console.log("✓ package-lock.json");
+  }
 
   // 7. Copy prisma schema and migrations if they exist (for SQLite)
   const prismaSchema = path.resolve(ROOT, "prisma", "schema.prisma");
@@ -98,7 +115,7 @@ function main() {
 
     const prismaConfig = path.resolve(ROOT, "prisma.config.ts");
     if (fs.existsSync(prismaConfig)) {
-      fs.copyFileSync(prismaConfig, path.resolve(deployPrisma, "prisma.config.ts"));
+      fs.copyFileSync(prismaConfig, path.resolve(DEPLOY_DIR, "prisma.config.ts"));
     }
 
     const migrations = path.resolve(ROOT, "prisma", "migrations");
@@ -119,7 +136,7 @@ function main() {
   const instructions = `# ExaContable - Instrucciones de Despliegue en cPanel
 
 ## Requisitos
-- Node.js 18+ (configurar en cPanel > Node.js Selector)
+- Node.js 22 LTS o Node.js 24 (configurar en cPanel > Node.js Selector)
 - SQLite (incluido, no necesita configuración externa)
 
 ## Pasos
@@ -131,7 +148,7 @@ Puedes usar File Manager o FTP.
 ### 2. Instalar dependencias
 En cPanel > Terminal (o SSH), navega a tu directorio y ejecuta:
 \`\`\`bash
-npm install
+npm ci --omit=dev
 \`\`\`
 Esto instalará las dependencias y ejecutará prisma generate + rebuild de better-sqlite3.
 
@@ -145,7 +162,7 @@ Edita el archivo \`.env\` con tus valores reales:
 ### 4. Configurar Node.js en cPanel
 En cPanel > Setup Node.js App:
 - Application mode: Production
-- Node.js version: 18+ 
+- Node.js version: 22 LTS (recomendado) o 24
 - Application root: (tu directorio)
 - Application startup file: server.js
 
@@ -188,11 +205,11 @@ npx prisma migrate deploy
   }
   console.log(`\n📦 Instrucciones:`);
   console.log(`   1. Sube la carpeta 'deploy/' a tu hosting cPanel`);
-  console.log(`   2. En cPanel > Terminal, ejecuta: npm install`);
+  console.log(`   2. En cPanel > Terminal, ejecuta: npm ci --omit=dev`);
   console.log(`   3. Edita el archivo .env con tus credenciales reales`);
   console.log(`   4. En cPanel > Node.js Selector, configura:`);
   console.log(`      - Application mode: Production`);
-  console.log(`      - Node.js version: 18+`);
+  console.log(`      - Node.js version: 22 LTS (recomendado) o 24`);
   console.log(`      - Application root: (tu directorio)`);
   console.log(`      - Application startup file: server.js`);
   console.log(`   5. Inicia la aplicación desde cPanel`);
